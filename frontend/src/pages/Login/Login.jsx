@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { http } from "../../api/http.js";
 import "./Login.css";
@@ -91,6 +91,9 @@ export default function Login() {
       >
         Registrarte
       </button>
+      <Link to="/overview" className="tour-link">
+        Ver cómo funciona EduCore
+      </Link>
     </form>
   );
 }
