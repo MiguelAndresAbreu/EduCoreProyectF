@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -42,6 +42,26 @@ export class UsersService {
       .leftJoinAndSelect('user.teacher', 'teacher')
       .where('user.username = :username', { username })
       .getOne();
+  }
+
+  async findByIds(ids: number[]): Promise<User[]> {
+    if (!ids.length) {
+      return [];
+    }
+    return this.userRepository.find({
+      where: { id: In(ids) },
+      relations: ['person', 'student', 'teacher'],
+    });
+  }
+
+  async findByRoles(roles: UserRole[]): Promise<User[]> {
+    if (!roles.length) {
+      return [];
+    }
+    return this.userRepository.find({
+      where: { role: In(roles) },
+      relations: ['person', 'student', 'teacher'],
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {

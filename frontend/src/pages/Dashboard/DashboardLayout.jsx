@@ -9,6 +9,10 @@ import {
   User,
   ChevronDown,
   LogOut,
+  Bell,
+  BarChart2,
+  AlertTriangle,
+  Wallet,
 } from "lucide-react";
 import { http } from "../../api/http.js";
 import "./Dashboard.css";
@@ -18,6 +22,9 @@ export default function DashboardLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -38,6 +45,19 @@ export default function DashboardLayout() {
     }
   }, [handleLogout]);
 
+  const fetchNotifications = useCallback(async () => {
+    if (!profile) return;
+    try {
+      setLoadingNotifications(true);
+      const { data } = await http.get(`/notifications/user/${profile.id}`);
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, [profile]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -46,6 +66,11 @@ export default function DashboardLayout() {
     }
     fetchProfile();
   }, [fetchProfile, handleLogout]);
+
+  useEffect(() => {
+    if (!profile) return;
+    fetchNotifications();
+  }, [profile, fetchNotifications]);
 
   const displayName = profile
     ? `${profile.person?.firstName ?? ""} ${profile.person?.lastName ?? ""}`.trim()
@@ -64,6 +89,15 @@ export default function DashboardLayout() {
       break;
     case "/attendance":
       pageTitle = "Asistencia";
+      break;
+    case "/reports":
+      pageTitle = "Reportes";
+      break;
+    case "/incidents":
+      pageTitle = "Incidencias";
+      break;
+    case "/finance":
+      pageTitle = "Caja";
       break;
     case "/profile":
       pageTitle = "Perfil";
@@ -112,6 +146,26 @@ export default function DashboardLayout() {
               </Link>
             </li>
             <li>
+              <Link to="/reports">
+                <BarChart2 size={18} />
+                <span>Reportes</span>
+              </Link>
+            </li>
+            {(profile?.role === "ADMIN" || profile?.role === "FINANCE") && (
+              <li>
+                <Link to="/finance">
+                  <Wallet size={18} />
+                  <span>Caja</span>
+                </Link>
+              </li>
+            )}
+            <li>
+              <Link to="/incidents">
+                <AlertTriangle size={18} />
+                <span>Incidencias</span>
+              </Link>
+            </li>
+            <li>
               <Link to="/profile">
                 <User size={18} />
                 <span>Perfil</span>
@@ -124,6 +178,63 @@ export default function DashboardLayout() {
       <header className="dashboard-header">
         <h1>{pageTitle}</h1>
         <div className="user-menu">
+          <div
+            className={`notification-bell ${notificationsOpen ? "active" : ""}`}
+            onClick={async () => {
+              const next = !notificationsOpen;
+              setNotificationsOpen(next);
+              if (next && profile) {
+                try {
+                  await http.put(`/notifications/user/${profile.id}/read`);
+                  await fetchNotifications();
+                } catch (error) {
+                  // ignore errors silently
+                }
+              }
+            }}
+          >
+            <Bell size={20} />
+            {notifications.some((notification) => !notification.read) && (
+              <span className="notification-dot" />
+            )}
+            {notificationsOpen && (
+              <div className="notifications-dropdown">
+                <header>
+                  <strong>Notificaciones</strong>
+                  {loadingNotifications && <span>Cargando...</span>}
+                </header>
+                <ul>
+                  {notifications.length === 0 && !loadingNotifications && (
+                    <li className="empty">Sin notificaciones</li>
+                  )}
+                  {notifications.map((notification) => (
+                    <li key={notification.id} className={notification.read ? "read" : "unread"}>
+                      <div>
+                        <h4>{notification.title}</h4>
+                        <p>{notification.message}</p>
+                      </div>
+                      {!notification.read && (
+                        <button
+                          type="button"
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            try {
+                              await http.put(`/notifications/${notification.id}/read`);
+                              await fetchNotifications();
+                            } catch (error) {
+                              // ignore
+                            }
+                          }}
+                        >
+                          Marcar leído
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
           <div className="user-info" onClick={() => setMenuOpen(!menuOpen)}>
             <img src={avatarUrl} alt="Usuario" />
             <span>{displayName || "Cargando..."}</span>

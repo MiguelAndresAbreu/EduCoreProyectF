@@ -12,6 +12,11 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { GradesModule } from './modules/grades/grades.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { FinanceModule } from './modules/finance/finance.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { IncidentsModule } from './modules/incidents/incidents.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -37,6 +42,11 @@ import { GradesModule } from './modules/grades/grades.module';
     EnrollmentsModule,
     AttendanceModule,
     GradesModule,
+    PaymentsModule,
+    FinanceModule,
+    NotificationsModule,
+    IncidentsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

@@ -28,6 +28,12 @@ export class CoursesController {
   }
 
   @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.coursesService.findOne(id);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
     return this.coursesService.create(createCourseDto);

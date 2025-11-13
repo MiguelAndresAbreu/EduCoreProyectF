@@ -5,10 +5,10 @@ import { AttendanceService } from './attendance.service';
 import { AttendanceController } from './attendance.controller';
 import { CoursesModule } from '../courses/courses.module';
 import { StudentsModule } from '../students/students.module';
-import { UsersModule } from '../users/users.module';
+import { TeachersModule } from '../teachers/teachers.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Attendance]), CoursesModule, StudentsModule, UsersModule],
+  imports: [TypeOrmModule.forFeature([Attendance]), CoursesModule, StudentsModule, TeachersModule],
   controllers: [AttendanceController],
   providers: [AttendanceService],
   exports: [AttendanceService],
