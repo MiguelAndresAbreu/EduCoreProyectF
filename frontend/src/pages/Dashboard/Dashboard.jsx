@@ -1,10 +1,16 @@
+import { useOutletContext } from "react-router-dom";
 import "./DashboardPage.css";
 
 export default function Dashboard() {
+  const { user } = useOutletContext();
+  const displayName = user?.person
+    ? `${user.person.firstName ?? ""} ${user.person.lastName ?? ""}`.trim()
+    : user?.username ?? "Usuario";
+
   return (
     <div className="dashboard-page">
       <header className="dashboard-welcome-header">
-        <h1>Bienvenido, Jhon Michael</h1>
+        <h1>Bienvenido, {displayName}</h1>
         <p>Selecciona una opción del menú para comenzar a explorar tu panel.</p>
       </header>
 

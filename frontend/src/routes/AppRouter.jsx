@@ -6,34 +6,27 @@ import Grades from "../pages/Grades/Grades.jsx";
 import Payments from "../pages/Payments/Payments.jsx";
 import Attendance from "../pages/Attendance/Attendance.jsx";
 import Profile from "../pages/Profile/Profile.jsx";
+import Reports from "../pages/Reports/Reports.jsx";
+import Finance from "../pages/Finance/Finance.jsx";
+import Incidents from "../pages/Incidents/Incidents.jsx";
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Rutas protegidas con layout */}
-        <Route element={<DashboardLayout pageTitle="Inicio" />}>
-  <Route path="/dashboard" element={<Dashboard />} />
-</Route>
-
-<Route element={<DashboardLayout pageTitle="Calificaciones" />}>
-  <Route path="/grades" element={<Grades />} />
-</Route>
-
-<Route element={<DashboardLayout pageTitle="Pagos" />}>
-  <Route path="/payments" element={<Payments />} />
-</Route>
-
-<Route element={<DashboardLayout pageTitle="Asistencia" />}>
-  <Route path="/attendance" element={<Attendance />} />
-</Route>
-
-<Route element={<DashboardLayout pageTitle="Perfil" />}>
-  <Route path="/profile" element={<Profile />} />
-</Route>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/grades" element={<Grades />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/incidents" element={<Incidents />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

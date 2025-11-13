@@ -1,34 +1,100 @@
 .attendance-page {
-  padding: 20px;
+  padding: 24px;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  background: #f8fbff;
 }
 
 .attendance-header h1 {
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #1e3a8a;
+  margin-bottom: 0.25rem;
 }
 
 .attendance-header p {
   font-size: 1rem;
   color: #3b82f6;
+  margin: 0;
+}
+
+.attendance-error {
+  background: #fee2e2;
+  border: 1px solid #f87171;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.attendance-controls {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.control-group select,
+.control-group input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1f2937;
+  min-width: 210px;
 }
 
 .attendance-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  grid-template-columns: 3fr 1.2fr;
+  gap: 24px;
   flex: 1;
+  align-items: flex-start;
+}
+
+.attendance-grid.student {
+  grid-template-columns: 1fr;
 }
 
 .attendance-table-container {
   overflow-x: auto;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(30,58,138,0.1);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.table-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+}
+
+.table-header .loading {
+  color: #2563eb;
+  font-size: 0.9rem;
 }
 
 .attendance-table {
@@ -40,34 +106,111 @@
 .attendance-table td {
   padding: 12px 15px;
   border-bottom: 1px solid #dbeafe;
+  font-size: 0.95rem;
 }
 
 .attendance-table th {
   background-color: #1e3a8a;
   color: #fff;
+  text-align: left;
+  font-weight: 600;
+}
+
+.attendance-table td.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.attendance-table td.actions button {
+  border: none;
+  background: #e0f2fe;
+  color: #1d4ed8;
+  padding: 0.35rem 0.6rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.attendance-table td.actions button.active,
+.attendance-table td.actions button:hover {
+  background: #1d4ed8;
+  color: white;
+}
+
+.attendance-table td.empty {
+  text-align: center;
+  font-style: italic;
+  color: #64748b;
+  padding: 2rem 1rem;
 }
 
 .attendance-summary {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.25rem;
+}
+
+.attendance-summary h3 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
 }
 
 .summary-card {
   background-color: #f0f5ff;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 0 8px rgba(30,58,138,0.1);
+  box-shadow: 0 0 8px rgba(30, 58, 138, 0.1);
   text-align: center;
 }
 
-.summary-card h3 {
-  color: #1e3a8a;
-  margin-bottom: 5px;
+.summary-card.highlight {
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
+  color: white;
+}
+
+.summary-card h4 {
+  margin: 0 0 0.35rem 0;
+  color: inherit;
+  font-size: 0.9rem;
 }
 
 .summary-card p {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #2563eb;
+  color: inherit;
+  margin: 0;
+}
+
+.attendance-submit {
+  margin-top: auto;
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
+  border: none;
+  color: white;
+  padding: 0.8rem 1.4rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.attendance-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.attendance-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
 }

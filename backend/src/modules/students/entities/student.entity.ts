@@ -12,6 +12,7 @@ import { User } from '../../users/entities/user.entity';
 import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
 import { Grade } from '../../grades/entities/grade.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity({ name: 'students' })
 export class Student {
@@ -43,4 +44,7 @@ export class Student {
 
   @OneToMany(() => Grade, (grade) => grade.student)
   grades: Grade[];
+
+  @OneToMany(() => Payment, (payment) => payment.student)
+  payments: Payment[];
 }

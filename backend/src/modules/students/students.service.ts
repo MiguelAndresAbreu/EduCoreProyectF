@@ -42,6 +42,7 @@ export class StudentsService {
         'enrollments.course.teacher',
         'enrollments.course.teacher.person',
         'grades',
+        'payments',
       ],
     });
   }

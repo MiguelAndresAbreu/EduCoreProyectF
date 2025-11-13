@@ -9,6 +9,8 @@ import {
 import { Person } from '../../person/entities/person.entity';
 import { User } from '../../users/entities/user.entity';
 import { Course } from '../../courses/entities/course.entity';
+import { Attendance } from '../../attendance/entities/attendance.entity';
+import { Grade } from '../../grades/entities/grade.entity';
 
 @Entity({ name: 'teachers' })
 export class Teacher {
@@ -31,4 +33,10 @@ export class Teacher {
 
   @OneToMany(() => Course, (course) => course.teacher)
   courses: Course[];
+
+  @OneToMany(() => Attendance, (attendance) => attendance.teacher)
+  attendanceRecords: Attendance[];
+
+  @OneToMany(() => Grade, (grade) => grade.teacher)
+  grades: Grade[];
 }

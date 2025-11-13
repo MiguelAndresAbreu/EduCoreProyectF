@@ -1,4 +1,5 @@
-import { IsDateString, IsInt, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional } from 'class-validator';
+import { GradeType } from '../entities/grade.entity';
 
 export class CreateGradeDto {
   @IsInt()
@@ -7,14 +8,15 @@ export class CreateGradeDto {
   @IsInt()
   studentId: number;
 
-  @IsString()
-  type: string;
+  @IsOptional()
+  @IsInt()
+  teacherId?: number;
+
+  @IsEnum(GradeType)
+  type: GradeType;
 
   @IsNumber()
-  score: number;
-
-  @IsNumber()
-  maxScore: number;
+  value: number;
 
   @IsDateString()
   date: string;
