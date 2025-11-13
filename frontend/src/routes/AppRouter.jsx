@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login/Login.jsx";
+import Overview from "../pages/Overview/Overview.jsx";
 import DashboardLayout from "../pages/Dashboard/DashboardLayout.jsx";
 import Dashboard from "../pages/Dashboard/Dashboard.jsx";
 import Grades from "../pages/Grades/Grades.jsx";
@@ -16,6 +17,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/overview" element={<Overview />} />
 
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
