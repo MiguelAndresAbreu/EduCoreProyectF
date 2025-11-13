@@ -18,6 +18,12 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: 'http://localhost:5174', // tu frontend
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   const swaggerOptions = {
     definition: {
       openapi: '3.0.0',

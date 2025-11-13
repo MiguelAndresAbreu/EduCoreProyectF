@@ -30,10 +30,10 @@ export class Student {
   @CreateDateColumn({ name: 'enrollment_date' })
   enrollmentDate: Date;
 
-  @Column({ default: 'ACTIVE' })
+  @Column('varchar', { default: 'ACTIVE' })
   status: string;
 
-  @Column({ name: 'grade_level', nullable: true })
+  @Column('varchar', { name: 'grade_level', nullable: true })
   gradeLevel?: string;
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.student)

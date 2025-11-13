@@ -31,7 +31,7 @@ export class Payment {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column()
+  @Column('varchar')
   concept: string;
 
   @Column({ type: 'date', name: 'payment_date' })

@@ -24,16 +24,16 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column('varchar', { unique: true })
   username: string;
 
-  @Column({ unique: true })
+  @Column('varchar', { unique: true })
   email: string;
 
-  @Column({ select: false })
+  @Column('varchar', { select: false })
   password: string;
 
-  @Column({ default: true })
+  @Column('varchar', { default: true })
   isActive: boolean;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })

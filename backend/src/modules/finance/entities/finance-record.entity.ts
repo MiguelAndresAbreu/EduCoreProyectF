@@ -16,7 +16,7 @@ export class FinanceRecord {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   amount: number;
 
-  @Column()
+  @Column('varchar')
   concept: string;
 
   @Column({ type: 'date' })

@@ -17,7 +17,7 @@ export class Course {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('varchar')
   name: string;
 
   @ManyToOne(() => Subject, (subject) => subject.courses, { eager: true })
@@ -28,13 +28,13 @@ export class Course {
   @JoinColumn({ name: 'teacher_id' })
   teacher: Teacher;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   schedule?: string;
 
-  @Column({ type: 'int', default: 30 })
+  @Column( { type: 'int', default: 30 })
   capacity: number;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   room?: string;
 
   @OneToMany(() => Enrollment, (enrollment) => enrollment.course)

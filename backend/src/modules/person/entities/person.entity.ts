@@ -13,25 +13,25 @@ export class Person {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'first_name' })
+  @Column('varchar', { name: 'first_name' })
   firstName: string;
 
-  @Column({ name: 'last_name' })
+  @Column('varchar', { name: 'last_name' })
   lastName: string;
 
-  @Column({ unique: true })
+  @Column('varchar', { unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   phone?: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   address?: string;
 
   @Column({ type: 'date', name: 'birth_date', nullable: true })
   birthDate?: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   avatar?: string;
 
   @OneToOne(() => User, (user) => user.person)

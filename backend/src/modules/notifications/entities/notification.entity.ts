@@ -20,7 +20,7 @@ export class Notification {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('varchar')
   title: string;
 
   @Column({ type: 'text' })
@@ -33,7 +33,7 @@ export class Notification {
   @Column({ type: 'enum', enum: NotificationType })
   type: NotificationType;
 
-  @Column({ default: false })
+  @Column('varchar', { default: false })
   read: boolean;
 
   @CreateDateColumn({ name: 'created_at' })

@@ -27,6 +27,6 @@ export class Enrollment {
   @CreateDateColumn({ name: 'enrolled_at' })
   enrolledAt: Date;
 
-  @Column({ default: 'ACTIVE' })
+  @Column('varchar', { default: 'ACTIVE' })
   status: string;
 }

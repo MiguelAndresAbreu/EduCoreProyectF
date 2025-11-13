@@ -6,13 +6,14 @@ export class Subject {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column('varchar', { length: 100 })
   name: string;
 
-  @Column({ unique: true })
+
+  @Column('varchar',{ unique: true })
   code: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 100, nullable: true })
   description?: string;
 
   @OneToMany(() => Course, (course) => course.subject)
