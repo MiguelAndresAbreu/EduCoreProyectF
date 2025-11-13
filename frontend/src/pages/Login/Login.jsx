@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { http } from "../../api/http.js";
 import "./Login.css";
 
 export default function Login() {
@@ -7,17 +8,46 @@ export default function Login() {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const remembered = localStorage.getItem("rememberUser");
+    if (remembered) {
+      setUser(remembered);
+      setRemember(true);
+    }
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/dashboard");
+    setError("");
+    setLoading(true);
+    try {
+      const { data } = await http.post("/auth/login", {
+        username: user,
+        password: pass,
+      });
+      localStorage.setItem("token", data.accessToken);
+      if (remember) {
+        localStorage.setItem("rememberUser", user);
+      } else {
+        localStorage.removeItem("rememberUser");
+      }
+      navigate("/dashboard");
+    } catch (err) {
+      const message = err.response?.data?.message || "Credenciales inválidas";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form className="login-container" onSubmit={handleSubmit}>
-      <p class="form-pretitle">EDUCORE</p>
-      <p class="form-title">
-        <strong>Iniciar Sesion</strong>
+      <p className="form-pretitle">EDUCORE</p>
+      <p className="form-title">
+        <strong>Iniciar Sesión</strong>
       </p>
       <div>
         <label>Usuario:</label>
@@ -44,14 +74,15 @@ export default function Login() {
             checked={remember}
             onChange={() => setRemember(!remember)}
           />
-          Recordar por 30 días{" "}
-          <a href="#" class="form-forgot-link">
+          Recordar por 30 días
+          <a href="#" className="form-forgot-link">
             Forgot password?
           </a>
         </label>
       </div>
-      <button className="Login-btn" type="submit">
-        Ingresar
+      {error && <p className="login-error">{error}</p>}
+      <button className="login-btn" type="submit" disabled={loading}>
+        {loading ? "Ingresando..." : "Ingresar"}
       </button>
       <button
         type="button"

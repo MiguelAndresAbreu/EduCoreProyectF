@@ -1,5 +1,5 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
 import {
   Menu,
   Home,
@@ -10,30 +10,51 @@ import {
   ChevronDown,
   LogOut,
 } from "lucide-react";
+import { http } from "../../api/http.js";
 import "./Dashboard.css";
 
 export default function DashboardLayout() {
-  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoadingProfile(true);
+      const { data } = await http.get("/auth/me");
+      setProfile(data);
+    } catch (error) {
+      handleLogout();
+    } finally {
+      setLoadingProfile(false);
+    }
+  }, [handleLogout]);
 
   useEffect(() => {
-    setUser({
-      name: "Jhon Michael Sierra Rodríguez",
-      role: "Estudiante",
-      avatar:
-        "https://ui-avatars.com/api/?name=Jhon+Sierra&background=1e3a8a&color=fff",
-    });
-  }, []);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      handleLogout();
+      return;
+    }
+    fetchProfile();
+  }, [fetchProfile, handleLogout]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
+  const displayName = profile
+    ? `${profile.person?.firstName ?? ""} ${profile.person?.lastName ?? ""}`.trim()
+    : "Usuario";
+  const avatarUrl =
+    profile?.person?.avatar ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName || "U")}&background=1e3a8a&color=fff`;
 
-  // Título dinámico según la ruta
-  let pageTitle = "Panel del Estudiante";
+  let pageTitle = "Panel";
   switch (location.pathname) {
     case "/grades":
       pageTitle = "Calificaciones";
@@ -48,7 +69,7 @@ export default function DashboardLayout() {
       pageTitle = "Perfil";
       break;
     case "/dashboard":
-      pageTitle = "Panel del Estudiante";
+      pageTitle = profile?.role === "TEACHER" ? "Panel del Docente" : "Panel del Estudiante";
       break;
     default:
       pageTitle = "";
@@ -56,14 +77,10 @@ export default function DashboardLayout() {
 
   return (
     <div className={`dashboard-container ${sidebarOpen ? "" : "collapsed"}`}>
-      {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-top">
           {sidebarOpen && <h2 className="sidebar-title">EduCore</h2>}
-          <button
-            className="toggle-btn"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
+          <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <Menu size={22} />
           </button>
         </div>
@@ -104,19 +121,18 @@ export default function DashboardLayout() {
         </nav>
       </aside>
 
-      {/* Header */}
       <header className="dashboard-header">
         <h1>{pageTitle}</h1>
         <div className="user-menu">
           <div className="user-info" onClick={() => setMenuOpen(!menuOpen)}>
-            <img src={user?.avatar} alt="Usuario" />
-            <span>{user?.name}</span>
+            <img src={avatarUrl} alt="Usuario" />
+            <span>{displayName || "Cargando..."}</span>
             <ChevronDown size={18} />
           </div>
 
           {menuOpen && (
             <div className="dropdown-menu">
-              <p>{user?.role}</p>
+              <p>{profile?.role ?? ""}</p>
               <button onClick={handleLogout}>
                 <LogOut size={16} /> Cerrar sesión
               </button>
@@ -125,9 +141,8 @@ export default function DashboardLayout() {
         </div>
       </header>
 
-      {/* Contenido principal */}
       <main className="dashboard-main">
-        <Outlet />
+        <Outlet context={{ user: profile, refreshUser: fetchProfile, loading: loadingProfile }} />
       </main>
     </div>
   );

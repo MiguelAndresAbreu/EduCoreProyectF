@@ -1,0 +1,66 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Teacher } from './entities/teacher.entity';
+import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { UsersService } from '../users/users.service';
+import { UserRole } from '../users/entities/user.entity';
+
+@Injectable()
+export class TeachersService {
+  constructor(
+    @InjectRepository(Teacher)
+    private readonly teacherRepository: Repository<Teacher>,
+    private readonly usersService: UsersService,
+  ) {}
+
+  findAll() {
+    return this.teacherRepository.find({ relations: ['user', 'courses'] });
+  }
+
+  async findOne(id: number) {
+    const teacher = await this.teacherRepository.findOne({
+      where: { id },
+      relations: ['user', 'courses', 'courses.subject'],
+    });
+    if (!teacher) {
+      throw new NotFoundException('Docente no encontrado');
+    }
+    return teacher;
+  }
+
+  async findByUserId(userId: number) {
+    return this.teacherRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user', 'courses', 'courses.subject'],
+    });
+  }
+
+  async create(createTeacherDto: CreateTeacherDto) {
+    const user = await this.usersService.findById(createTeacherDto.userId);
+    if (user.role !== UserRole.TEACHER && user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('El usuario no puede ser docente');
+    }
+
+    const existingTeacher = await this.findByUserId(user.id);
+    if (existingTeacher) {
+      throw new BadRequestException('El docente ya existe');
+    }
+
+    const teacher = this.teacherRepository.create({
+      user,
+      person: user.person,
+      hireDate: createTeacherDto.hireDate,
+      subjects: createTeacherDto.subjects,
+    });
+
+    return this.teacherRepository.save(teacher);
+  }
+
+  async update(id: number, updateTeacherDto: UpdateTeacherDto) {
+    const teacher = await this.findOne(id);
+    Object.assign(teacher, updateTeacherDto);
+    return this.teacherRepository.save(teacher);
+  }
+}
