@@ -1,0 +1,26 @@
+{
+  "name": "educore-2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Warking07/educore.git"
+  },
+
+  "dependencies": {
+    "pg": "^8.x.x"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Warking07/educore/issues"
+  },
+  "homepage": "https://github.com/Warking07/educore#readme"
+}

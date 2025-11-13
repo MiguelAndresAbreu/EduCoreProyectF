@@ -1,0 +1,269 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Poppins", sans-serif;
+  background: #ffffff;
+}
+
+/* --- Layout general --- */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 70px 1fr;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main";
+  height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.collapsed {
+  grid-template-columns: 90px 1fr;
+}
+
+.dashboard-container.collapsed .dashboard-menu a {
+  width: 56px;
+  padding: 0.6rem;
+  margin: 0.3rem auto;
+  justify-content: center;
+}
+
+.dashboard-container.collapsed .dashboard-menu span {
+  display: none;
+}
+
+/* --- Sidebar --- */
+.dashboard-sidebar {
+  grid-area: sidebar;
+  background: #162b77;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.dashboard-container.collapsed .dashboard-main {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+/* --- Sidebar top --- */
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.sidebar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: white;
+  margin: 0;
+}
+
+.dashboard-container.collapsed .sidebar-title {
+  display: none;
+}
+
+/* --- Botón menú --- */
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* --- Menú lateral --- */
+.dashboard-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 80%;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding-right: 0.5rem;
+}
+
+.dashboard-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.dashboard-menu li {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+  color: #e2e8f0;
+  font-weight: 500;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  margin: 0.3rem auto;
+  background: #1d3a8a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 0 4px rgba(255,255,255,0.05);
+  width: 200%;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.dashboard-menu a:hover,
+.dashboard-menu a.active {
+  background: #3556c2;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.25);
+}
+
+/* --- Header --- */
+.dashboard-header {
+  grid-area: header;
+  background: #2f58c5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 5;
+}
+
+.dashboard-header h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* --- Menú de usuario --- */
+.user-menu {
+  position: relative; /* necesario para el dropdown */
+}
+
+.user-info {
+  display: flex;               /* avatar, nombre y flecha en línea */
+  align-items: center;         /* centra verticalmente con el texto y flecha */
+  gap: 0.5rem;                 /* espacio reducido */
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.3rem 0.7rem;      /* más compacto */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.user-info img {
+  width: 28px;                 /* tamaño reducido del avatar */
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.user-info span {
+  font-size: 0.95rem;          /* tamaño del nombre */
+}
+
+.user-info svg {
+  width: 16px;                  /* tamaño de la flecha */
+  height: 16px;
+}
+
+/* --- Dropdown pequeño debajo del user-info --- */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;       /* justo debajo */
+  right: 0;        /* alineado a la derecha */
+  background: #f0f5ff;
+  border-radius: 8px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  padding: 0.5rem 1rem;
+  min-width: 160px;
+  z-index: 10;
+  text-align: left;
+}
+
+.dropdown-menu p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+  color: #1e3a8a;
+  font-size: 0.85rem;
+}
+
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: background 0.3s ease;
+}
+
+.dropdown-menu button:hover {
+  background: #dc2626;
+}
+
+/* --- Main --- */
+.dashboard-main {
+  flex: 1;
+  padding: 2rem;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  grid-area: main;
+  background: #ffffff;
+  color: #1e293b;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* --- Cuadro de bienvenida y páginas --- */
+.welcome-section,
+.page-container {
+  background: #f1f5ff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 80%;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+}
