@@ -116,9 +116,12 @@
   gap: 10px;
   margin-top: 15px;
   border-radius: 5px;
+.login-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.Login-btn:hover {
+.login-btn:hover {
   background-color: #f5f5f5;
 }
 
@@ -143,6 +146,17 @@
 
 .register-btn:hover {
   background-color: #1290cf;
+}
+
+.login-error {
+  width: 100%;
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.75rem 1rem;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: center;
 }
 
 .login-options {

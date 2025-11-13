@@ -1,45 +1,41 @@
-import { Request, Response } from 'express';
-import { Student } from './students.model';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { StudentsService } from './students.service';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
-let students: Student[] = [];
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('students')
+export class StudentsController {
+  constructor(private readonly studentsService: StudentsService) {}
 
-export const getStudents = (req: Request, res: Response) => {
-  res.json(students);
-};
-
-export const getStudentById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const student = students.find(s => s.id === id);
-  if (student) res.json(student);
-  else res.status(404).json({ message: 'Estudiante no encontrado' });
-};
-
-export const createStudent = (req: Request, res: Response) => {
-  const { name, email } = req.body;
-  const newStudent: Student = {
-    id: students.length + 1,
-    name,
-    email,
-  };
-  students.push(newStudent);
-  res.status(201).json(newStudent);
-};
-
-export const updateStudent = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const { name, email } = req.body;
-  const student = students.find(s => s.id === id);
-  if (student) {
-    student.name = name;
-    student.email = email;
-    res.json(student);
-  } else {
-    res.status(404).json({ message: 'Estudiante no encontrado' });
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @Post()
+  create(@Body() createStudentDto: CreateStudentDto) {
+    return this.studentsService.create(createStudentDto);
   }
-};
 
-export const deleteStudent = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  students = students.filter(s => s.id !== id);
-  res.status(204).send();
-};
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @Get()
+  findAll() {
+    return this.studentsService.findAll();
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.studentsService.findOne(id);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @Put(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStudentDto: UpdateStudentDto,
+  ) {
+    return this.studentsService.update(id, updateStudentDto);
+  }
+}
