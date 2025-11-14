@@ -27,7 +27,13 @@ export class CourseModel {
   @Field(() => String, { nullable: true })
   room?: string | null;
 
-  @Field(() => [EnrollmentModel], { nullable: true })
+  @Field(
+    () =>
+      import('../../enrollments/models/enrollment.model').then(
+        (m) => m.EnrollmentModel,
+      ),
+    { nullable: true },
+  )
   enrollments?: (EnrollmentModel | null)[] | null;
 
   static fromEntity(
