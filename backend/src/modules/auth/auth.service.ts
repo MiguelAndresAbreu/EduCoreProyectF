@@ -7,10 +7,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { UserRole } from '../users/entities/user.entity';
-import { StudentsService } from '../students/students.service';
-import { TeachersService } from '../teachers/teachers.service';
-import { CoursesService } from '../courses/courses.service';
-import { GradesService } from '../grades/grades.service';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class AuthService {
@@ -18,10 +15,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly personService: PersonService,
     private readonly jwtService: JwtService,
-    private readonly studentsService: StudentsService,
-    private readonly teachersService: TeachersService,
-    private readonly coursesService: CoursesService,
-    private readonly gradesService: GradesService,
+    private readonly profileService: ProfileService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -48,15 +42,9 @@ export class AuthService {
       person,
     });
 
-    if (user.role === UserRole.STUDENT) {
-      await this.studentsService.create({ userId: user.id });
-    }
+    await this.profileService.ensureProfile(user);
 
-    if (user.role === UserRole.TEACHER) {
-      await this.teachersService.create({ userId: user.id });
-    }
-
-    return this.buildAuthResponse(user);
+    return this.buildAuthResponse(user.id);
   }
 
   async login(loginDto: LoginDto) {
@@ -70,52 +58,21 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    return this.buildAuthResponse(user);
+    return this.buildAuthResponse(user.id);
   }
 
   async me(userId: number) {
     const user = await this.usersService.findById(userId);
-    return this.buildProfile(user);
+    return this.profileService.buildProfile(user);
   }
 
-  private async buildAuthResponse(user: any) {
+  private async buildAuthResponse(userId: number) {
+    const user = await this.usersService.findById(userId);
     const payload: JwtPayload = { sub: user.id, username: user.username, role: user.role };
     const accessToken = this.jwtService.sign(payload);
     return {
       accessToken,
-      user: await this.buildProfile(user),
+      user: await this.profileService.buildProfile(user),
     };
-  }
-
-  private async buildProfile(userOrId: any) {
-    const user = typeof userOrId === 'number' ? await this.usersService.findById(userOrId) : userOrId;
-
-    const profile: any = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      person: user.person,
-    };
-
-    if (user.role === UserRole.TEACHER) {
-      const teacher = await this.teachersService.findByUserId(user.id);
-      profile.teacher = teacher;
-      profile.courses = teacher ? await this.coursesService.findByTeacher(teacher.id) : [];
-    }
-
-    if (user.role === UserRole.STUDENT) {
-      const student = await this.studentsService.findByUserId(user.id);
-      profile.student = student;
-      profile.enrollments = student?.enrollments ?? [];
-      if (student) {
-        profile.grades = await this.gradesService.findByStudent(student.id);
-      } else {
-        profile.grades = [];
-      }
-    }
-
-    return profile;
   }
 }

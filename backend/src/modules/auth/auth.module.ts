@@ -1,14 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { PersonModule } from '../person/person.module';
-import { StudentsModule } from '../students/students.module';
-import { TeachersModule } from '../teachers/teachers.module';
-import { CoursesModule } from '../courses/courses.module';
-import { GradesModule } from '../grades/grades.module';
+import { ProfileModule } from '../profile/profile.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -20,10 +17,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
     UsersModule,
     PersonModule,
-    StudentsModule,
-    TeachersModule,
-    CoursesModule,
-    GradesModule,
+    forwardRef(() => ProfileModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
