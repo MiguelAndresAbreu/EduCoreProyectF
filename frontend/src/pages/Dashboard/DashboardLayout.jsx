@@ -18,10 +18,20 @@ import { http } from "../../api/http.js";
 import "./Dashboard.css";
 
 export default function DashboardLayout() {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => {
+    const stored = localStorage.getItem("currentUser");
+    if (!stored) {
+      return null;
+    }
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(() => !profile);
   const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
@@ -30,6 +40,8 @@ export default function DashboardLayout() {
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
+    setProfile(null);
     navigate("/login", { replace: true });
   }, [navigate]);
 
@@ -38,7 +50,10 @@ export default function DashboardLayout() {
       setLoadingProfile(true);
       const { data } = await http.get("/auth/me");
       setProfile(data);
+      localStorage.setItem("currentUser", JSON.stringify(data));
     } catch (error) {
+      console.error("No se pudo cargar el perfil", error);
+      localStorage.removeItem("currentUser");
       handleLogout();
     } finally {
       setLoadingProfile(false);
@@ -52,6 +67,7 @@ export default function DashboardLayout() {
       const { data } = await http.get(`/notifications/user/${profile.id}`);
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error("No se pudieron cargar las notificaciones", error);
       setNotifications([]);
     } finally {
       setLoadingNotifications(false);
@@ -187,7 +203,7 @@ export default function DashboardLayout() {
                 try {
                   await http.put(`/notifications/user/${profile.id}/read`);
                   await fetchNotifications();
-                } catch (error) {
+                } catch {
                   // ignore errors silently
                 }
               }
@@ -221,7 +237,7 @@ export default function DashboardLayout() {
                             try {
                               await http.put(`/notifications/${notification.id}/read`);
                               await fetchNotifications();
-                            } catch (error) {
+                            } catch {
                               // ignore
                             }
                           }}

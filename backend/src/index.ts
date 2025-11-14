@@ -56,9 +56,12 @@ async function bootstrap() {
         schemas: {
           LoginDto: {
             type: 'object',
-            required: ['username', 'password'],
+            required: ['identifier', 'password'],
             properties: {
-              username: { type: 'string' },
+              identifier: {
+                type: 'string',
+                description: 'Nombre de usuario o correo electrónico',
+              },
               password: { type: 'string', format: 'password' },
             },
           },

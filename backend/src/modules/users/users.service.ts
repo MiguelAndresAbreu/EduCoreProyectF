@@ -44,6 +44,23 @@ export class UsersService {
       .getOne();
   }
 
+  async findForAuth(identifier: string): Promise<User | null> {
+    const normalized = identifier.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+
+    return this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .leftJoinAndSelect('user.person', 'person')
+      .leftJoinAndSelect('user.student', 'student')
+      .leftJoinAndSelect('user.teacher', 'teacher')
+      .where('LOWER(user.username) = :username', { username: normalized })
+      .orWhere('LOWER(user.email) = :email', { email: normalized })
+      .getOne();
+  }
+
   async findByIds(ids: number[]): Promise<User[]> {
     if (!ids.length) {
       return [];
