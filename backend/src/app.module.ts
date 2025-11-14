@@ -35,11 +35,21 @@ import { ReportsModule } from './modules/reports/reports.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || '12345678',
-      database: process.env.DB_NAME || 'educore',
+      ...(process.env.DATABASE_URL
+        ? {
+            url: process.env.DATABASE_URL,
+          }
+        : {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT ?? '5432', 10),
+            username: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD || '12345678',
+            database: process.env.DB_NAME || 'educore',
+          }),
+      ssl:
+        process.env.DB_SSL === 'true'
+          ? { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true' }
+          : undefined,
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
     }),

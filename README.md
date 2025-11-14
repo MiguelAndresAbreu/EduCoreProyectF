@@ -19,7 +19,7 @@ Esta guía resume los requisitos, pasos de instalación y comandos necesarios pa
 1. **Node.js 18 o superior** (se recomienda la versión LTS). Verifica con `node -v` y `npm -v`.
 2. **npm** (incluido con Node.js) o **pnpm/yarn** si prefieres administradores alternativos.
 3. **PostgreSQL 13+** en ejecución y accesible. Puedes usar Docker o un servicio local.
-4. (Opcional) **Docker** si quieres levantar dependencias auxiliares como la base de datos mediante contenedores. Se provee un `docker-compose.yml` de ejemplo para SQL Server.
+4. (Opcional) **Docker** si quieres levantar dependencias auxiliares como la base de datos mediante contenedores. El `docker-compose.yml` incluido permite iniciar PostgreSQL + pgAdmin (y mantiene el servicio de ejemplo para SQL Server).
 
 ## Configuración del backend
 
@@ -28,19 +28,28 @@ Esta guía resume los requisitos, pasos de instalación y comandos necesarios pa
    cd backend
    npm install
    ```
-2. Crea un archivo `.env` en `backend/` con la configuración de entorno necesaria:
+2. Crea un archivo `.env` en `backend/` con la configuración de entorno necesaria (puedes copiar `backend/.env` como base):
    ```env
-   PORT=3000
-   NODE_ENV=development
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=postgres
-   DB_NAME=educore
-   JWT_SECRET=supersecret
-   ```
+    PORT=3000
+    NODE_ENV=development
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USER=postgres
+   DB_PASSWORD=12345678
+    DB_NAME=educore
+   # Opcional para despliegues con conexión URL completa o SSL
+   # DATABASE_URL=postgres://postgres:12345678@localhost:5432/educore
+   # DB_SSL=false
+   # DB_SSL_REJECT_UNAUTHORIZED=false
+    JWT_SECRET=supersecret
+    ```
    Ajusta las credenciales según tu servidor PostgreSQL.
-3. Inicializa la base de datos (crear BD `educore` o la que definas en `DB_NAME`).
+3. Inicializa la base de datos (crear BD `educore` o la que definas en `DB_NAME`). Si prefieres Docker, ejecuta:
+   ```bash
+   docker compose up -d postgres pgadmin
+   ```
+   - PostgreSQL quedará disponible en `localhost:5432` con usuario `postgres` y contraseña `12345678`.
+   - pgAdmin se expone en `http://localhost:5050` (usuario `admin@educore.local`, contraseña `admin123`). Desde pgAdmin puedes gestionar la BD y verificar la conexión.
 4. Ejecuta la API en modo desarrollo:
    ```bash
    npm run dev
@@ -83,7 +92,7 @@ Esta guía resume los requisitos, pasos de instalación y comandos necesarios pa
 
 ## Flujo típico de desarrollo
 
-1. Levanta PostgreSQL (local o contenedor) y crea la base de datos especificada.
+1. Levanta PostgreSQL (local o contenedor) y crea la base de datos especificada. Con Docker basta con `docker compose up -d postgres`.
 2. Inicia el backend (`npm run dev` en `/backend`) y espera a que NestJS muestre el mensaje `Application is running on: http://localhost:3000/api`.
 3. Arranca el frontend (`npm run dev` en `/frontend`) y abre el navegador en `http://localhost:5173`.
 4. Ingresa con un usuario existente o registra uno nuevo mediante `/api/auth/register` (el formulario de registro web está pendiente, pero la API está disponible). Luego inicia sesión en la interfaz para acceder al panel.
