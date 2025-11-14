@@ -11,7 +11,11 @@ export class EnrollmentModel {
   @Field(() => StudentModel)
   student: StudentModel;
 
-  @Field(() => CourseModel, { nullable: true })
+  @Field(
+    () =>
+      import('../../courses/models/course.model').then((m) => m.CourseModel),
+    { nullable: true },
+  )
   course?: CourseModel | null;
 
   @Field(() => Date)
