@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { http } from "../../api/http.js";
+import { register as registerMutation } from "../../api/graphqlOperations";
 import "./Register.css";
 
 const initialPersonState = {
@@ -62,7 +62,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const { data } = await http.post("/auth/register", payload);
+      const data = await registerMutation(payload);
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       localStorage.removeItem("rememberUser");

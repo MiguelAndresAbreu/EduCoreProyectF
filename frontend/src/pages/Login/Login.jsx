@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { http } from "../../api/http.js";
+import { login as loginMutation } from "../../api/graphqlOperations";
 import "./Login.css";
 
 export default function Login() {
@@ -29,10 +29,7 @@ export default function Login() {
         throw new Error("Debes ingresar tu usuario o correo");
       }
 
-      const { data } = await http.post("/auth/login", {
-        identifier: normalizedIdentifier,
-        password: pass,
-      });
+      const data = await loginMutation(normalizedIdentifier, pass);
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       if (remember) {

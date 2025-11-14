@@ -14,7 +14,12 @@ import {
   AlertTriangle,
   Wallet,
 } from "lucide-react";
-import { http } from "../../api/http.js";
+import {
+  fetchProfile as fetchProfileQuery,
+  fetchNotifications as fetchNotificationsQuery,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "../../api/graphqlOperations";
 import "./Dashboard.css";
 
 export default function DashboardLayout() {
@@ -48,7 +53,7 @@ export default function DashboardLayout() {
   const fetchProfile = useCallback(async () => {
     try {
       setLoadingProfile(true);
-      const { data } = await http.get("/auth/me");
+      const data = await fetchProfileQuery();
       setProfile(data);
       localStorage.setItem("currentUser", JSON.stringify(data));
     } catch (error) {
@@ -64,7 +69,7 @@ export default function DashboardLayout() {
     if (!profile) return;
     try {
       setLoadingNotifications(true);
-      const { data } = await http.get(`/notifications/user/${profile.id}`);
+      const data = await fetchNotificationsQuery(profile.id);
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("No se pudieron cargar las notificaciones", error);
@@ -201,7 +206,7 @@ export default function DashboardLayout() {
               setNotificationsOpen(next);
               if (next && profile) {
                 try {
-                  await http.put(`/notifications/user/${profile.id}/read`);
+                  await markAllNotificationsRead(profile.id);
                   await fetchNotifications();
                 } catch {
                   // ignore errors silently
@@ -235,7 +240,7 @@ export default function DashboardLayout() {
                           onClick={async (event) => {
                             event.stopPropagation();
                             try {
-                              await http.put(`/notifications/${notification.id}/read`);
+                              await markNotificationRead(notification.id);
                               await fetchNotifications();
                             } catch {
                               // ignore

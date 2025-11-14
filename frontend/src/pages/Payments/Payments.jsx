@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import { fetchPaymentsByStudent, createPayment as createPaymentMutation } from "../../api/graphqlOperations";
 import "./Payments.css";
 
 const METHODS = [
@@ -43,7 +43,7 @@ export default function Payments() {
   const fetchPayments = async (id) => {
     try {
       setLoading(true);
-      const { data } = await http.get(`/payments/student/${id}`);
+      const data = await fetchPaymentsByStudent(Number(id));
       setPayments(Array.isArray(data.payments) ? data.payments : []);
       setTotals(data.accountStatus ?? { paid: 0, pending: 0, balance: 0 });
       setError("");
@@ -65,7 +65,7 @@ export default function Payments() {
     if (!formData.studentId || !formData.amount) return;
     setSaving(true);
     try {
-      await http.post("/payments", {
+      await createPaymentMutation({
         studentId: Number(formData.studentId),
         concept: formData.concept,
         amount: Number(formData.amount),

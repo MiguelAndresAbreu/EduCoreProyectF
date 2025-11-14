@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import { fetchPerformanceReport, fetchReports } from "../../api/graphqlOperations";
 import "./Reports.css";
 
 export default function Reports() {
@@ -28,7 +28,7 @@ export default function Reports() {
   const fetchPerformance = async (studentId) => {
     try {
       setLoading(true);
-      const { data } = await http.get(`/reports/student/${studentId}/performance`);
+      const data = await fetchPerformanceReport(studentId);
       setPerformanceReport(data);
       setError("");
     } catch (err) {
@@ -53,15 +53,11 @@ export default function Reports() {
         ...(filters.endDate ? { endDate: filters.endDate } : {}),
       };
 
-      const [attendanceResponse, gradesResponse, paymentsResponse] = await Promise.all([
-        http.get("/reports/attendance", { params }),
-        http.get("/reports/grades", { params }),
-        http.get("/reports/payments", { params }),
-      ]);
+      const { attendance, grades, payments } = await fetchReports(params);
 
-      setAttendanceReport(attendanceResponse.data);
-      setGradesReport(gradesResponse.data);
-      setPaymentsReport(paymentsResponse.data);
+      setAttendanceReport(attendance);
+      setGradesReport(grades);
+      setPaymentsReport(payments);
       setError("");
     } catch (err) {
       setError("No se pudieron generar los reportes. Verifica los filtros seleccionados.");

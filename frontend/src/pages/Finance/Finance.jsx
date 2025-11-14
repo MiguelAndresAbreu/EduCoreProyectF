@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import { fetchFinanceOverview, createFinanceRecord } from "../../api/graphqlOperations";
 import "./Finance.css";
 
 const TYPES = [
@@ -34,12 +34,9 @@ export default function Finance() {
   const fetchSummary = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, balanceResponse] = await Promise.all([
-        http.get("/finance/dashboard"),
-        http.get("/finance/balance"),
-      ]);
-      setDashboard(dashboardResponse.data);
-      setBalance(balanceResponse.data);
+      const data = await fetchFinanceOverview();
+      setDashboard(data.dashboard);
+      setBalance(data.balance);
       setError("");
     } catch (err) {
       setError("No se pudo cargar la información financiera.");
@@ -57,7 +54,7 @@ export default function Finance() {
     if (!formData.amount || !formData.concept) return;
     setSaving(true);
     try {
-      await http.post("/finance", {
+      await createFinanceRecord({
         type: formData.type,
         amount: Number(formData.amount),
         concept: formData.concept,
