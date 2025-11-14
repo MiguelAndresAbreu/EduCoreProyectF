@@ -25,7 +25,7 @@ export class EnrollmentsResolver {
     @Args('input') input: CreateEnrollmentInput,
   ): Promise<EnrollmentModel> {
     const enrollment = await this.enrollmentsService.create(input);
-    return EnrollmentModel.fromEntity(enrollment);
+    return EnrollmentModel.fromEntity(enrollment, { includeCourse: true });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,7 +43,9 @@ export class EnrollmentsResolver {
     }
 
     const enrollments = await this.enrollmentsService.findByStudentId(studentId);
-    return enrollments.map((enrollment) => EnrollmentModel.fromEntity(enrollment));
+    return enrollments.map((enrollment) =>
+      EnrollmentModel.fromEntity(enrollment, { includeCourse: true }),
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

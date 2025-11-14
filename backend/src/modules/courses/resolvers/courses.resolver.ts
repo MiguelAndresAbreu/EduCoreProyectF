@@ -29,7 +29,7 @@ export class CoursesResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<CourseModel> {
     const course = await this.coursesService.findOne(id);
-    return CourseModel.fromEntity(course);
+    return CourseModel.fromEntity(course, { includeEnrollments: true });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -40,7 +40,7 @@ export class CoursesResolver {
   ): Promise<CourseModel> {
     const course = await this.coursesService.create(input);
     const created = await this.coursesService.findOne(course.id);
-    return CourseModel.fromEntity(created);
+    return CourseModel.fromEntity(created, { includeEnrollments: true });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -52,7 +52,7 @@ export class CoursesResolver {
   ): Promise<CourseModel> {
     const updated = await this.coursesService.update(id, input);
     const course = await this.coursesService.findOne(updated.id);
-    return CourseModel.fromEntity(course);
+    return CourseModel.fromEntity(course, { includeEnrollments: true });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
