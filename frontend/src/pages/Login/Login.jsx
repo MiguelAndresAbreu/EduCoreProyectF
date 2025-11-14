@@ -87,7 +87,7 @@ export default function Login() {
       <button
         type="button"
         className="register-btn"
-        onClick={() => alert("Funcionalidad de registro pendiente")}
+        onClick={() => navigate("/register")}
       >
         Registrarte
       </button>
