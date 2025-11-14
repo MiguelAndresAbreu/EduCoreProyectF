@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enrollment } from './entities/enrollment.entity';
-import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
+import { CreateEnrollmentInput } from './dto/create-enrollment.input';
 import { StudentsService } from '../students/students.service';
 import { CoursesService } from '../courses/courses.service';
 
@@ -15,9 +15,9 @@ export class EnrollmentsService {
     private readonly coursesService: CoursesService,
   ) {}
 
-  async create(createEnrollmentDto: CreateEnrollmentDto) {
-    const student = await this.studentsService.findOne(createEnrollmentDto.studentId);
-    const course = await this.coursesService.findOne(createEnrollmentDto.courseId);
+  async create(createEnrollmentInput: CreateEnrollmentInput) {
+    const student = await this.studentsService.findOne(createEnrollmentInput.studentId);
+    const course = await this.coursesService.findOne(createEnrollmentInput.courseId);
 
     const activeEnrollments = await this.enrollmentRepository.count({
       where: { course: { id: course.id }, status: 'ACTIVE' },
@@ -38,7 +38,7 @@ export class EnrollmentsService {
     const enrollment = this.enrollmentRepository.create({
       student,
       course,
-      status: createEnrollmentDto.status ?? 'ACTIVE',
+      status: createEnrollmentInput.status ?? 'ACTIVE',
     });
 
     return this.enrollmentRepository.save(enrollment);

@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserInput } from './dto/create-user.input';
+import { UpdateUserInput } from './dto/update-user.input';
 import { PersonService } from '../person/person.service';
 import { Person } from '../person/entities/person.entity';
 
@@ -90,32 +90,32 @@ export class UsersService {
       .getOne();
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.findByUsername(createUserDto.username);
+  async create(createUserInput: CreateUserInput): Promise<User> {
+    const existingUser = await this.findByUsername(createUserInput.username);
     if (existingUser) {
       throw new BadRequestException('El nombre de usuario ya está en uso');
     }
 
-    const existingEmail = await this.findByEmail(createUserDto.email);
+    const existingEmail = await this.findByEmail(createUserInput.email);
     if (existingEmail) {
       throw new BadRequestException('El correo ya está en uso');
     }
 
-    const person = createUserDto.personId
-      ? await this.personService.findOne(createUserDto.personId)
+    const person = createUserInput.personId
+      ? await this.personService.findOne(createUserInput.personId)
       : null;
 
-    if (createUserDto.personId && !person) {
+    if (createUserInput.personId && !person) {
       throw new BadRequestException('La persona asociada no existe');
     }
 
-    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    const passwordHash = await bcrypt.hash(createUserInput.password, 10);
 
     const user = this.userRepository.create({
-      username: createUserDto.username,
-      email: createUserDto.email,
+      username: createUserInput.username,
+      email: createUserInput.email,
       password: passwordHash,
-      role: createUserDto.role ?? UserRole.STUDENT,
+      role: createUserInput.role ?? UserRole.STUDENT,
       person: person ?? undefined,
     });
 
@@ -152,31 +152,31 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserInput: UpdateUserInput): Promise<User> {
     const user = await this.findById(id);
 
-    if (updateUserDto.username && updateUserDto.username !== user.username) {
-      const existing = await this.findByUsername(updateUserDto.username);
+    if (updateUserInput.username && updateUserInput.username !== user.username) {
+      const existing = await this.findByUsername(updateUserInput.username);
       if (existing && existing.id !== id) {
         throw new BadRequestException('El nombre de usuario ya está en uso');
       }
     }
 
-    if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingEmail = await this.findByEmail(updateUserDto.email);
+    if (updateUserInput.email && updateUserInput.email !== user.email) {
+      const existingEmail = await this.findByEmail(updateUserInput.email);
       if (existingEmail && existingEmail.id !== id) {
         throw new BadRequestException('El correo ya está en uso');
       }
     }
 
     let password = user.password;
-    if (updateUserDto.password) {
-      password = await bcrypt.hash(updateUserDto.password, 10);
+    if (updateUserInput.password) {
+      password = await bcrypt.hash(updateUserInput.password, 10);
     }
 
     const updated = await this.userRepository.save({
       ...user,
-      ...updateUserDto,
+      ...updateUserInput,
       password,
     });
 
