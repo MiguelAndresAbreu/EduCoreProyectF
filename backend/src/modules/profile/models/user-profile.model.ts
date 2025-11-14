@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserRole } from '../../users/entities/user.entity';
 import { PersonModel } from '../../person/models/person.model';
 import { TeacherModel } from '../../teachers/models/teacher.model';
@@ -9,19 +9,19 @@ import { GradeModel } from '../../grades/models/grade.model';
 
 @ObjectType()
 export class UserProfileModel {
-  @Field()
+  @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   username: string;
 
-  @Field()
+  @Field(() => String)
   email: string;
 
   @Field(() => UserRole)
   role: UserRole;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
   @Field(() => PersonModel, { nullable: true })

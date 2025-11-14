@@ -2,8 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { CreatePaymentInput, UpdatePaymentInput } from './inputs/payment.input';
 import { StudentsService } from '../students/students.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/entities/notification.entity';
@@ -17,15 +16,15 @@ export class PaymentsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async create(createPaymentDto: CreatePaymentDto) {
-    const student = await this.studentsService.findOne(createPaymentDto.studentId);
+  async create(createPaymentInput: CreatePaymentInput) {
+    const student = await this.studentsService.findOne(createPaymentInput.studentId);
 
     const duplicate = await this.paymentRepository.findOne({
       where: {
         student: { id: student.id },
-        concept: createPaymentDto.concept,
-        paymentDate: createPaymentDto.paymentDate,
-        amount: createPaymentDto.amount,
+        concept: createPaymentInput.concept,
+        paymentDate: createPaymentInput.paymentDate,
+        amount: createPaymentInput.amount,
       },
     });
 
@@ -35,11 +34,11 @@ export class PaymentsService {
 
     const payment = this.paymentRepository.create({
       student,
-      amount: createPaymentDto.amount,
-      concept: createPaymentDto.concept,
-      paymentDate: createPaymentDto.paymentDate,
-      method: createPaymentDto.method,
-      status: createPaymentDto.status,
+      amount: createPaymentInput.amount,
+      concept: createPaymentInput.concept,
+      paymentDate: createPaymentInput.paymentDate,
+      method: createPaymentInput.method,
+      status: createPaymentInput.status,
     });
 
     const saved = await this.paymentRepository.save(payment);
@@ -47,7 +46,7 @@ export class PaymentsService {
     return saved;
   }
 
-  async update(id: number, updatePaymentDto: UpdatePaymentDto) {
+  async update(id: number, updatePaymentInput: UpdatePaymentInput) {
     const payment = await this.paymentRepository.findOne({
       where: { id },
       relations: ['student', 'student.user'],
@@ -57,16 +56,16 @@ export class PaymentsService {
       throw new NotFoundException('Pago no encontrado');
     }
 
-    if (updatePaymentDto.studentId) {
-      payment.student = await this.studentsService.findOne(updatePaymentDto.studentId);
+    if (updatePaymentInput.studentId) {
+      payment.student = await this.studentsService.findOne(updatePaymentInput.studentId);
     }
 
     Object.assign(payment, {
-      amount: updatePaymentDto.amount ?? payment.amount,
-      concept: updatePaymentDto.concept ?? payment.concept,
-      paymentDate: updatePaymentDto.paymentDate ?? payment.paymentDate,
-      method: updatePaymentDto.method ?? payment.method,
-      status: updatePaymentDto.status ?? payment.status,
+      amount: updatePaymentInput.amount ?? payment.amount,
+      concept: updatePaymentInput.concept ?? payment.concept,
+      paymentDate: updatePaymentInput.paymentDate ?? payment.paymentDate,
+      method: updatePaymentInput.method ?? payment.method,
+      status: updatePaymentInput.status ?? payment.status,
     });
 
     const saved = await this.paymentRepository.save(payment);

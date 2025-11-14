@@ -2,11 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsWhere, Repository } from 'typeorm';
 import { Grade } from './entities/grade.entity';
-import { CreateGradeDto } from './dto/create-grade.dto';
+import { CreateGradeInput, UpdateGradeInput } from './inputs/grade.input';
 import { CoursesService } from '../courses/courses.service';
 import { StudentsService } from '../students/students.service';
 import { TeachersService } from '../teachers/teachers.service';
-import { UpdateGradeDto } from './dto/update-grade.dto';
 
 @Injectable()
 export class GradesService {
@@ -18,13 +17,13 @@ export class GradesService {
     private readonly teachersService: TeachersService,
   ) {}
 
-  async create(createGradeDto: CreateGradeDto) {
-    const course = await this.coursesService.findOne(createGradeDto.courseId);
-    const student = await this.studentsService.findOne(createGradeDto.studentId);
-    if (!createGradeDto.teacherId) {
+  async create(createGradeInput: CreateGradeInput) {
+    const course = await this.coursesService.findOne(createGradeInput.courseId);
+    const student = await this.studentsService.findOne(createGradeInput.studentId);
+    if (!createGradeInput.teacherId) {
       throw new NotFoundException('Debe indicar el docente que registra la calificación');
     }
-    const teacher = await this.teachersService.findOne(createGradeDto.teacherId);
+    const teacher = await this.teachersService.findOne(createGradeInput.teacherId);
 
     if (course.teacher.id !== teacher.id) {
       throw new NotFoundException('El docente no está asignado al curso seleccionado');
@@ -34,15 +33,15 @@ export class GradesService {
       course,
       student,
       teacher,
-      type: createGradeDto.type,
-      value: createGradeDto.value,
-      date: createGradeDto.date,
+      type: createGradeInput.type,
+      value: createGradeInput.value,
+      date: createGradeInput.date,
     });
 
     return this.gradeRepository.save(grade);
   }
 
-  async update(id: number, updateGradeDto: UpdateGradeDto) {
+  async update(id: number, updateGradeInput: UpdateGradeInput) {
     const grade = await this.gradeRepository.findOne({
       where: { id },
       relations: ['course', 'student', 'teacher'],
@@ -51,22 +50,22 @@ export class GradesService {
       throw new NotFoundException('Calificación no encontrada');
     }
 
-    if (updateGradeDto.courseId) {
-      grade.course = await this.coursesService.findOne(updateGradeDto.courseId);
+    if (updateGradeInput.courseId) {
+      grade.course = await this.coursesService.findOne(updateGradeInput.courseId);
     }
 
-    if (updateGradeDto.studentId) {
-      grade.student = await this.studentsService.findOne(updateGradeDto.studentId);
+    if (updateGradeInput.studentId) {
+      grade.student = await this.studentsService.findOne(updateGradeInput.studentId);
     }
 
-    if (updateGradeDto.teacherId) {
-      grade.teacher = await this.teachersService.findOne(updateGradeDto.teacherId);
+    if (updateGradeInput.teacherId) {
+      grade.teacher = await this.teachersService.findOne(updateGradeInput.teacherId);
     }
 
     Object.assign(grade, {
-      type: updateGradeDto.type ?? grade.type,
-      value: updateGradeDto.value ?? grade.value,
-      date: updateGradeDto.date ?? grade.date,
+      type: updateGradeInput.type ?? grade.type,
+      value: updateGradeInput.value ?? grade.value,
+      date: updateGradeInput.date ?? grade.date,
     });
 
     return this.gradeRepository.save(grade);

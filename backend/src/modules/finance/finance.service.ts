@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { FinanceRecord, FinanceRecordType } from './entities/finance-record.entity';
-import { CreateFinanceRecordDto } from './dto/create-finance-record.dto';
+import { CreateFinanceRecordInput } from './inputs/create-finance-record.input';
 
 @Injectable()
 export class FinanceService {
@@ -11,8 +11,8 @@ export class FinanceService {
     private readonly financeRepository: Repository<FinanceRecord>,
   ) {}
 
-  create(createFinanceRecordDto: CreateFinanceRecordDto) {
-    const record = this.financeRepository.create(createFinanceRecordDto);
+  create(createFinanceRecordInput: CreateFinanceRecordInput) {
+    const record = this.financeRepository.create(createFinanceRecordInput);
     return this.financeRepository.save(record);
   }
 

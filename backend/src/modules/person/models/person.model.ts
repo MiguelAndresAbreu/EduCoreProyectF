@@ -6,25 +6,25 @@ export class PersonModel {
   @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   firstName: string;
 
-  @Field()
+  @Field(() => String)
   lastName: string;
 
-  @Field()
+  @Field(() => String)
   email: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   phone?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   address?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   birthDate?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   avatar?: string | null;
 
   static fromEntity(entity: Person | null | undefined): PersonModel | null {

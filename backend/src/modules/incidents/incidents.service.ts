@@ -2,8 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { Incident, IncidentStatus } from './entities/incident.entity';
-import { CreateIncidentDto } from './dto/create-incident.dto';
-import { UpdateIncidentDto } from './dto/update-incident.dto';
+import { CreateIncidentInput, UpdateIncidentInput } from './inputs/incident.input';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/entities/notification.entity';
@@ -22,16 +21,16 @@ export class IncidentsService {
     private readonly teachersService: TeachersService,
   ) {}
 
-  async create(createIncidentDto: CreateIncidentDto) {
-    const reporter = await this.usersService.findById(createIncidentDto.reporterId);
-    const reported = await this.usersService.findById(createIncidentDto.reportedId);
+  async create(createIncidentInput: CreateIncidentInput) {
+    const reporter = await this.usersService.findById(createIncidentInput.reporterId);
+    const reported = await this.usersService.findById(createIncidentInput.reportedId);
 
     const incident = this.incidentRepository.create({
       reporter,
       reported,
-      description: createIncidentDto.description,
-      date: createIncidentDto.date,
-      status: createIncidentDto.status ?? IncidentStatus.OPEN,
+      description: createIncidentInput.description,
+      date: createIncidentInput.date,
+      status: createIncidentInput.status ?? IncidentStatus.OPEN,
     });
 
     const saved = await this.incidentRepository.save(incident);
@@ -39,29 +38,29 @@ export class IncidentsService {
     return saved;
   }
 
-  async update(id: number, updateIncidentDto: UpdateIncidentDto) {
+  async update(id: number, updateIncidentInput: UpdateIncidentInput) {
     const incident = await this.incidentRepository.findOne({ where: { id } });
     if (!incident) {
       throw new NotFoundException('Incidencia no encontrada');
     }
 
-    if (updateIncidentDto.reporterId) {
-      incident.reporter = await this.usersService.findById(updateIncidentDto.reporterId);
+    if (updateIncidentInput.reporterId) {
+      incident.reporter = await this.usersService.findById(updateIncidentInput.reporterId);
     }
 
-    if (updateIncidentDto.reportedId) {
-      incident.reported = await this.usersService.findById(updateIncidentDto.reportedId);
+    if (updateIncidentInput.reportedId) {
+      incident.reported = await this.usersService.findById(updateIncidentInput.reportedId);
     }
 
     Object.assign(incident, {
-      description: updateIncidentDto.description ?? incident.description,
-      date: updateIncidentDto.date ?? incident.date,
-      status: updateIncidentDto.status ?? incident.status,
+      description: updateIncidentInput.description ?? incident.description,
+      date: updateIncidentInput.date ?? incident.date,
+      status: updateIncidentInput.status ?? incident.status,
     });
 
     const saved = await this.incidentRepository.save(incident);
 
-    if (updateIncidentDto.status && updateIncidentDto.status !== IncidentStatus.OPEN) {
+    if (updateIncidentInput.status && updateIncidentInput.status !== IncidentStatus.OPEN) {
       await this.notifyStaff(saved, true);
     }
 

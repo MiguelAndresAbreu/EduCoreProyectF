@@ -2,7 +2,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { PaymentsService } from '../payments.service';
 import { PaymentModel, PaymentsTotalsModel, StudentPaymentsModel } from '../models/payment.model';
-import { CreatePaymentInput } from '../models/payment.input';
+import { CreatePaymentInput, UpdatePaymentInput } from '../inputs/payment.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -44,5 +44,31 @@ export class PaymentsResolver {
   async createPayment(@Args('input') input: CreatePaymentInput): Promise<PaymentModel> {
     const payment = await this.paymentsService.create(input);
     return PaymentModel.fromEntity(payment);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.FINANCE)
+  @Mutation(() => PaymentModel)
+  async updatePayment(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('input') input: UpdatePaymentInput,
+  ): Promise<PaymentModel> {
+    const payment = await this.paymentsService.update(id, input);
+    return PaymentModel.fromEntity(payment);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.FINANCE)
+  @Query(() => StudentPaymentsModel)
+  async paymentsReport(
+    @Args('studentId', { type: () => Int, nullable: true }) studentId?: number,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
+  ): Promise<StudentPaymentsModel> {
+    const report = await this.paymentsService.getReport({ studentId, startDate, endDate });
+    return {
+      payments: report.payments.map((payment) => PaymentModel.fromEntity(payment)),
+      accountStatus: { ...report.totals } as PaymentsTotalsModel,
+    };
   }
 }

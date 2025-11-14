@@ -6,13 +6,13 @@ export class SubjectModel {
   @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   name: string;
 
-  @Field()
+  @Field(() => String)
   code: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   description?: string | null;
 
   static fromEntity(entity: Subject | null | undefined): SubjectModel {

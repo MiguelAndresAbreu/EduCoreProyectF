@@ -11,16 +11,16 @@ export class UserModel {
   @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   username: string;
 
-  @Field()
+  @Field(() => String)
   email: string;
 
   @Field(() => UserRole)
   role: UserRole;
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 
   @Field(() => PersonModel, { nullable: true })

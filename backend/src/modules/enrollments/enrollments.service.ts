@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enrollment } from './entities/enrollment.entity';
-import { CreateEnrollmentInput } from './dto/create-enrollment.input';
+import { CreateEnrollmentInput } from './inputs/create-enrollment.input';
 import { StudentsService } from '../students/students.service';
 import { CoursesService } from '../courses/courses.service';
 

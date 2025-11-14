@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Course } from '../entities/course.entity';
 import { SubjectModel } from '../../subjects/models/subject.model';
 import { TeacherModel } from '../../teachers/models/teacher.model';
@@ -9,7 +9,7 @@ export class CourseModel {
   @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   name: string;
 
   @Field(() => SubjectModel)
@@ -18,13 +18,13 @@ export class CourseModel {
   @Field(() => TeacherModel)
   teacher: TeacherModel;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   schedule?: string | null;
 
-  @Field()
+  @Field(() => Int)
   capacity: number;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   room?: string | null;
 
   @Field(() => [EnrollmentModel], { nullable: true })

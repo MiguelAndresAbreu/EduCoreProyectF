@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Attendance, AttendanceStatus } from '../entities/attendance.entity';
 import { CourseModel } from '../../courses/models/course.model';
 import { StudentModel } from '../../students/models/student.model';
@@ -20,7 +20,7 @@ export class AttendanceModel {
   @Field(() => TeacherModel, { nullable: true })
   teacher?: TeacherModel | null;
 
-  @Field()
+  @Field(() => String)
   date: string;
 
   @Field(() => AttendanceStatus)
@@ -51,19 +51,19 @@ export class AttendanceModel {
 
 @ObjectType()
 export class AttendanceSummaryModel {
-  @Field()
+  @Field(() => Int)
   total: number;
 
-  @Field()
+  @Field(() => Int)
   present: number;
 
-  @Field()
+  @Field(() => Int)
   absent: number;
 
-  @Field()
+  @Field(() => Int)
   late: number;
 
-  @Field()
+  @Field(() => Float)
   attendanceRate: number;
 }
 

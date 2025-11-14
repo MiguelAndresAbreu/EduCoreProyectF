@@ -3,7 +3,7 @@ import { UserProfileModel } from '../../profile/models/user-profile.model';
 
 @ObjectType()
 export class AuthPayloadModel {
-  @Field()
+  @Field(() => String)
   accessToken: string;
 
   @Field(() => UserProfileModel)

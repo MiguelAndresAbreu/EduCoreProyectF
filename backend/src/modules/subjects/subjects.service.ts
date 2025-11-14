@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
-import { CreateSubjectDto } from './dto/create-subject.dto';
-import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { CreateSubjectInput } from './inputs/create-subject.input';
+import { UpdateSubjectInput } from './inputs/update-subject.input';
 
 @Injectable()
 export class SubjectsService {
@@ -24,20 +24,20 @@ export class SubjectsService {
     return subject;
   }
 
-  async create(createSubjectDto: CreateSubjectDto) {
+  async create(createSubjectInput: CreateSubjectInput) {
     const existing = await this.subjectRepository.findOne({
-      where: { code: createSubjectDto.code },
+      where: { code: createSubjectInput.code },
     });
     if (existing) {
       throw new BadRequestException('El código de la asignatura ya existe');
     }
 
-    const subject = this.subjectRepository.create(createSubjectDto);
+    const subject = this.subjectRepository.create(createSubjectInput);
     return this.subjectRepository.save(subject);
   }
 
-  async update(id: number, updateSubjectDto: UpdateSubjectDto) {
-    const subject = await this.subjectRepository.preload({ id, ...updateSubjectDto });
+  async update(id: number, updateSubjectInput: UpdateSubjectInput) {
+    const subject = await this.subjectRepository.preload({ id, ...updateSubjectInput });
     if (!subject) {
       throw new NotFoundException('Asignatura no encontrada');
     }

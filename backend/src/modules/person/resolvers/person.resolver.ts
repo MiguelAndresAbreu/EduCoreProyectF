@@ -7,8 +7,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { UsersService } from '../../users/users.service';
 import { UserRole } from '../../users/entities/user.entity';
-import { UpdatePersonInput } from '../models/update-person.input';
-import { UpdatePersonDto } from '../dto/update-person.dto';
+import { UpdatePersonInput } from '../inputs/update-person.input';
 
 @Resolver(() => PersonModel)
 export class PersonResolver {
@@ -43,7 +42,7 @@ export class PersonResolver {
       throw new ForbiddenException('No puedes modificar otra persona');
     }
 
-    const person = await this.personService.update(id, input as UpdatePersonDto);
+    const person = await this.personService.update(id, input);
     const model = PersonModel.fromEntity(person);
     if (!model) {
       throw new Error('Persona no encontrada');

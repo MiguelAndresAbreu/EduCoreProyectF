@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { PersonService } from '../person/person.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { RegisterInput } from './inputs/register.input';
+import { LoginInput } from './inputs/login.input';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { UserRole } from '../users/entities/user.entity';
 import { ProfileService } from '../profile/profile.service';
@@ -18,27 +18,27 @@ export class AuthService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
-    const personExists = await this.personService.findByEmail(registerDto.email);
+  async register(registerInput: RegisterInput) {
+    const personExists = await this.personService.findByEmail(registerInput.email);
     if (personExists) {
       throw new BadRequestException('El correo ya está registrado');
     }
 
     const person = await this.personService.create({
-      firstName: registerDto.firstName,
-      lastName: registerDto.lastName,
-      email: registerDto.email,
-      phone: registerDto.phone,
-      address: registerDto.address,
-      birthDate: registerDto.birthDate,
-      avatar: registerDto.avatar,
+      firstName: registerInput.firstName,
+      lastName: registerInput.lastName,
+      email: registerInput.email,
+      phone: registerInput.phone,
+      address: registerInput.address,
+      birthDate: registerInput.birthDate,
+      avatar: registerInput.avatar,
     });
 
     const user = await this.usersService.createWithPerson({
-      username: registerDto.username,
-      email: registerDto.email,
-      password: registerDto.password,
-      role: registerDto.role ?? UserRole.STUDENT,
+      username: registerInput.username,
+      email: registerInput.email,
+      password: registerInput.password,
+      role: registerInput.role ?? UserRole.STUDENT,
       person,
     });
 
@@ -47,8 +47,8 @@ export class AuthService {
     return this.buildAuthResponse(user.id);
   }
 
-  async login(loginDto: LoginDto) {
-    const identifier = loginDto.identifier?.trim() ?? '';
+  async login(loginInput: LoginInput) {
+    const identifier = loginInput.identifier?.trim() ?? '';
     if (!identifier) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -58,7 +58,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(loginInput.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
