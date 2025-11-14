@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import {
+  fetchIncidentsForAdmin,
+  fetchIncidentsByTeacher,
+  fetchIncidentsByStudent,
+  createIncident as createIncidentMutation,
+  updateIncidentStatus as updateIncidentStatusMutation,
+} from "../../api/graphqlOperations";
 import "./Incidents.css";
 
 const STATUSES = [
@@ -33,16 +39,15 @@ export default function Incidents() {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      let response;
       if (isAdmin) {
-        response = await http.get("/incidents", { params: statusFilter ? { status: statusFilter } : {} });
+        const data = await fetchIncidentsForAdmin(statusFilter || undefined);
+        setIncidents(Array.isArray(data) ? data : []);
       } else if (isTeacher && user?.teacher?.id) {
-        response = await http.get(`/incidents/teacher/${user.teacher.id}`);
+        const data = await fetchIncidentsByTeacher(user.teacher.id);
+        setIncidents(Array.isArray(data) ? data : []);
       } else if (isStudent && user?.student?.id) {
-        response = await http.get(`/incidents/student/${user.student.id}`);
-      }
-      if (response) {
-        setIncidents(Array.isArray(response.data) ? response.data : []);
+        const data = await fetchIncidentsByStudent(user.student.id);
+        setIncidents(Array.isArray(data) ? data : []);
       }
       setError("");
     } catch (err) {
@@ -62,7 +67,7 @@ export default function Incidents() {
     if (!formData.reportedId || !formData.description) return;
     setSaving(true);
     try {
-      await http.post("/incidents", {
+      await createIncidentMutation({
         reportedId: Number(formData.reportedId),
         description: formData.description,
         date: formData.date,
@@ -80,7 +85,7 @@ export default function Incidents() {
 
   const handleStatusUpdate = async (incidentId, status) => {
     try {
-      await http.put(`/incidents/${incidentId}`, { status });
+      await updateIncidentStatusMutation(incidentId, status);
       await fetchIncidents();
     } catch (err) {
       setError("No se pudo actualizar el estado de la incidencia.");

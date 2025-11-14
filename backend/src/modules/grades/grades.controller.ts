@@ -36,6 +36,9 @@ export class GradesController {
   async create(@Body() createGradeDto: CreateGradeDto, @CurrentUser() user: JwtPayload) {
     if (user.role === UserRole.TEACHER) {
       const teacher = await this.teachersService.findByUserId(user.sub);
+      if (!teacher) {
+        throw new ForbiddenException('No autorizado para registrar calificaciones');
+      }
       createGradeDto.teacherId = teacher.id;
     }
     return this.gradesService.create(createGradeDto);

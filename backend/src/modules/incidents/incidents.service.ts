@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { FindOptionsWhere, Incident, IncidentStatus } from './entities/incident.entity';
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { Incident, IncidentStatus } from './entities/incident.entity';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { UsersService } from '../users/users.service';

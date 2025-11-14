@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import {
+  fetchCourse,
+  fetchAttendanceByCourse,
+  fetchAttendanceByStudent,
+  recordAttendance as recordAttendanceMutation,
+} from "../../api/graphqlOperations";
 import { format } from "date-fns";
 import "./Attendance.css";
 
@@ -51,18 +56,17 @@ export default function Attendance() {
     try {
       setLoading(true);
       const [courseResponse, attendanceResponse] = await Promise.all([
-        http.get(`/courses/${courseId}`),
-        http.get(`/attendance/course/${courseId}`, { params: { date: selectedDate } }),
+        fetchCourse(courseId),
+        fetchAttendanceByCourse(courseId, selectedDate),
       ]);
 
-      const attendanceData = attendanceResponse.data || {};
       setCourseAttendance({
-        records: attendanceData.records ?? attendanceData,
-        summary: attendanceData.summary ?? null,
+        records: attendanceResponse?.records ?? [],
+        summary: attendanceResponse?.summary ?? null,
       });
-      setCourseDetails(courseResponse.data);
+      setCourseDetails(courseResponse);
       const initialDraft = {};
-      courseResponse.data?.enrollments?.forEach((enrollment) => {
+      courseResponse?.enrollments?.forEach((enrollment) => {
         initialDraft[enrollment.student.id] = "PRESENT";
       });
       setAttendanceDraft(initialDraft);
@@ -77,10 +81,10 @@ export default function Attendance() {
   const fetchStudentAttendance = async (id) => {
     try {
       setLoading(true);
-      const { data } = await http.get(`/attendance/student/${id}`);
+      const data = await fetchAttendanceByStudent(id);
       setStudentAttendance({
-        records: data.records ?? data,
-        summary: data.summary ?? null,
+        records: data?.records ?? [],
+        summary: data?.summary ?? null,
       });
       setError("");
     } catch (err) {
@@ -99,9 +103,10 @@ export default function Attendance() {
     setSaving(true);
     try {
       const requests = Object.entries(attendanceDraft).map(([studentId, status]) =>
-        http.post("/attendance", {
+        recordAttendanceMutation({
           courseId: selectedCourse,
           studentId: Number(studentId),
+          teacherId: user.teacher.id,
           status,
           date: selectedDate,
         })

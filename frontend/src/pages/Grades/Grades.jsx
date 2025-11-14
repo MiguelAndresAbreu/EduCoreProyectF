@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { http } from "../../api/http";
+import {
+  fetchCourse,
+  fetchGradesByCourse,
+  fetchGradesByStudent,
+  createGrade as createGradeMutation,
+} from "../../api/graphqlOperations";
 import { format } from "date-fns";
 import "./Grades.css";
 
@@ -54,12 +59,12 @@ export default function Grades() {
   const fetchCourseGrades = async (courseId) => {
     try {
       setLoading(true);
-      const [courseResponse, gradesResponse] = await Promise.all([
-        http.get(`/courses/${courseId}`),
-        http.get(`/grades/course/${courseId}`),
+      const [course, courseGrades] = await Promise.all([
+        fetchCourse(courseId),
+        fetchGradesByCourse(courseId),
       ]);
-      setCourseDetails(courseResponse.data);
-      setCourseGrades(Array.isArray(gradesResponse.data) ? gradesResponse.data : []);
+      setCourseDetails(course);
+      setCourseGrades(Array.isArray(courseGrades) ? courseGrades : []);
       setError("");
     } catch (err) {
       setError("No se pudo cargar la información del curso.");
@@ -72,7 +77,7 @@ export default function Grades() {
   const fetchStudentGrades = async (studentId) => {
     try {
       setLoading(true);
-      const { data } = await http.get(`/grades/student/${studentId}`);
+      const data = await fetchGradesByStudent(studentId);
       setStudentGrades(Array.isArray(data) ? data : []);
       setError("");
     } catch (err) {
@@ -92,9 +97,11 @@ export default function Grades() {
     if (!selectedCourseId || !formData.studentId || !formData.value) return;
     setSaving(true);
     try {
-      await http.post("/grades", {
+      const teacherId = user?.teacher?.id ?? courseDetails?.teacher?.id;
+      await createGradeMutation({
         courseId: selectedCourseId,
         studentId: Number(formData.studentId),
+        teacherId,
         type: formData.type,
         value: Number(formData.value),
         date: formData.date,

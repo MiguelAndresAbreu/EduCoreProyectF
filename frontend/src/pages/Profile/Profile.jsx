@@ -10,7 +10,7 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
-import { http } from "../../api/http.js";
+import { updateProfile as updateProfileMutation } from "../../api/graphqlOperations";
 import "./Profile.css";
 
 const formatDate = (value) => {
@@ -72,20 +72,9 @@ export default function Profile() {
 
   const averageGrade = useMemo(() => {
     if (!isStudent || !user?.grades?.length) return null;
-    const { total, count } = user.grades.reduce(
-      (acc, grade) => {
-        const max = Number(grade.maxScore) || 0;
-        const score = Number(grade.score) || 0;
-        if (max > 0) {
-          acc.total += (score / max) * 100;
-          acc.count += 1;
-        }
-        return acc;
-      },
-      { total: 0, count: 0 },
-    );
-    if (!count) return null;
-    return (total / count).toFixed(1);
+    const total = user.grades.reduce((sum, grade) => sum + Number(grade.value ?? 0), 0);
+    if (!user.grades.length) return null;
+    return (total / user.grades.length).toFixed(1);
   }, [user, isStudent]);
 
   const handleInputChange = (event) => {
@@ -137,16 +126,13 @@ export default function Profile() {
     });
 
     try {
-      await http.put(`/person/${user.person.id}`, personPayload);
-      await http.put(`/users/${user.id}`, { email: personPayload.email });
+      const userPayload = personPayload.email ? { email: personPayload.email } : undefined;
+      await updateProfileMutation(user.id, user.person.id, personPayload, userPayload);
       await refreshUser();
       setStatus({ type: "success", message: "Perfil actualizado correctamente." });
       setIsEditing(false);
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        "No se pudo actualizar el perfil. Intenta nuevamente.";
-      setStatus({ type: "error", message });
+      setStatus({ type: "error", message: error.message || "No se pudo actualizar el perfil. Intenta nuevamente." });
     } finally {
       setSaving(false);
     }

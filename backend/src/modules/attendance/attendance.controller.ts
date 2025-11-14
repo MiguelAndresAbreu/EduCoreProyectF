@@ -37,6 +37,9 @@ export class AttendanceController {
   ) {
     if (user.role === UserRole.TEACHER) {
       const teacher = await this.teachersService.findByUserId(user.sub);
+      if (!teacher) {
+        throw new ForbiddenException('No autorizado para registrar asistencia');
+      }
       createAttendanceDto.teacherId = teacher.id;
     }
     return this.attendanceService.registerAttendance(createAttendanceDto);

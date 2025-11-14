@@ -1,4 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../../modules/users/entities/user.entity';
@@ -17,7 +18,10 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request =
+      context.getType() === 'http'
+        ? context.switchToHttp().getRequest()
+        : GqlExecutionContext.create(context).getContext().req;
     const user = request.user as { role?: UserRole } | undefined;
 
     if (!user || !user.role) {

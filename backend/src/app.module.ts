@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'node:path';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { PersonModule } from './modules/person/person.module';
@@ -21,6 +25,14 @@ import { ReportsModule } from './modules/reports/reports.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'backend', 'src', 'schema.gql'),
+      sortSchema: true,
+      context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
+      path: '/graphql',
+      useGlobalPrefix: false,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
