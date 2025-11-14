@@ -2,7 +2,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { AttendanceService } from '../attendance.service';
 import { AttendanceModel, AttendanceResultModel } from '../models/attendance.model';
-import { RecordAttendanceInput } from '../models/attendance.input';
+import { RecordAttendanceInput } from '../inputs/record-attendance.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';

@@ -2,14 +2,12 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SubjectsService } from '../subjects.service';
 import { SubjectModel } from '../models/subject.model';
-import { CreateSubjectInput } from '../models/create-subject.input';
-import { UpdateSubjectInput } from '../models/update-subject.input';
+import { CreateSubjectInput } from '../inputs/create-subject.input';
+import { UpdateSubjectInput } from '../inputs/update-subject.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CreateSubjectDto } from '../dto/create-subject.dto';
-import { UpdateSubjectDto } from '../dto/update-subject.dto';
 
 @Resolver(() => SubjectModel)
 export class SubjectsResolver {
@@ -21,7 +19,7 @@ export class SubjectsResolver {
   async createSubject(
     @Args('input') input: CreateSubjectInput,
   ): Promise<SubjectModel> {
-    const subject = await this.subjectsService.create(input as CreateSubjectDto);
+    const subject = await this.subjectsService.create(input);
     return SubjectModel.fromEntity(subject);
   }
 
@@ -48,7 +46,7 @@ export class SubjectsResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('input') input: UpdateSubjectInput,
   ): Promise<SubjectModel> {
-    const subject = await this.subjectsService.update(id, input as UpdateSubjectDto);
+    const subject = await this.subjectsService.update(id, input);
     return SubjectModel.fromEntity(subject);
   }
 

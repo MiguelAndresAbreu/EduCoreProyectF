@@ -2,7 +2,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { IncidentsService } from '../incidents.service';
 import { IncidentModel } from '../models/incident.model';
-import { CreateIncidentInput, UpdateIncidentStatusInput } from '../models/incident.input';
+import { CreateIncidentInput, UpdateIncidentInput } from '../inputs/incident.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -83,10 +83,11 @@ export class IncidentsResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.STAFF)
   @Mutation(() => IncidentModel)
-  async updateIncidentStatus(
-    @Args('input') input: UpdateIncidentStatusInput,
+  async updateIncident(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('input') input: UpdateIncidentInput,
   ): Promise<IncidentModel> {
-    const incident = await this.incidentsService.update(input.id, { status: input.status });
+    const incident = await this.incidentsService.update(id, input);
     return IncidentModel.fromEntity(incident);
   }
 }

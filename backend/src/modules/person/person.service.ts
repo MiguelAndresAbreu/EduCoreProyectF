@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Person } from './entities/person.entity';
-import { CreatePersonDto } from './dto/create-person.dto';
-import { UpdatePersonDto } from './dto/update-person.dto';
+import { CreatePersonInput } from './inputs/create-person.input';
+import { UpdatePersonInput } from './inputs/update-person.input';
 
 @Injectable()
 export class PersonService {
@@ -12,8 +12,8 @@ export class PersonService {
     private readonly personRepository: Repository<Person>,
   ) {}
 
-  create(createPersonDto: CreatePersonDto): Promise<Person> {
-    const person = this.personRepository.create(createPersonDto);
+  create(createPersonInput: CreatePersonInput): Promise<Person> {
+    const person = this.personRepository.create(createPersonInput);
     return this.personRepository.save(person);
   }
 
@@ -25,8 +25,8 @@ export class PersonService {
     return this.personRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, updatePersonDto: UpdatePersonDto): Promise<Person> {
-    const person = await this.personRepository.preload({ id, ...updatePersonDto });
+  async update(id: number, updatePersonInput: UpdatePersonInput): Promise<Person> {
+    const person = await this.personRepository.preload({ id, ...updatePersonInput });
     if (!person) {
       throw new NotFoundException('Persona no encontrada');
     }

@@ -1,4 +1,4 @@
-import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Grade, GradeType } from '../entities/grade.entity';
 import { CourseModel } from '../../courses/models/course.model';
 import { StudentModel } from '../../students/models/student.model';
@@ -26,7 +26,7 @@ export class GradeModel {
   @Field(() => Float)
   value: number;
 
-  @Field()
+  @Field(() => String)
   date: string;
 
   @Field(() => Date)
@@ -51,4 +51,25 @@ export class GradeModel {
     model.createdAt = entity.createdAt;
     return model;
   }
+}
+
+@ObjectType()
+export class GradeStudentAverageModel {
+  @Field(() => Int)
+  studentId: number;
+
+  @Field(() => Float)
+  average: number;
+}
+
+@ObjectType()
+export class GradeReportModel {
+  @Field(() => [GradeModel])
+  grades: GradeModel[];
+
+  @Field(() => Float)
+  average: number;
+
+  @Field(() => [GradeStudentAverageModel])
+  averagesByStudent: GradeStudentAverageModel[];
 }

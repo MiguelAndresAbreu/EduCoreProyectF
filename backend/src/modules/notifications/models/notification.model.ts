@@ -9,16 +9,16 @@ export class NotificationModel {
   @Field(() => ID)
   id: number;
 
-  @Field()
+  @Field(() => String)
   title: string;
 
-  @Field()
+  @Field(() => String)
   message: string;
 
   @Field(() => NotificationType)
   type: NotificationType;
 
-  @Field()
+  @Field(() => Boolean)
   read: boolean;
 
   @Field(() => Date)

@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
+import { CreateCourseInput } from './inputs/create-course.input';
+import { UpdateCourseInput } from './inputs/update-course.input';
 import { SubjectsService } from '../subjects/subjects.service';
 import { TeachersService } from '../teachers/teachers.service';
 
@@ -47,37 +47,37 @@ export class CoursesService {
     });
   }
 
-  async create(createCourseDto: CreateCourseDto) {
-    const subject = await this.subjectsService.findOne(createCourseDto.subjectId);
-    const teacher = await this.teachersService.findOne(createCourseDto.teacherId);
+  async create(createCourseInput: CreateCourseInput) {
+    const subject = await this.subjectsService.findOne(createCourseInput.subjectId);
+    const teacher = await this.teachersService.findOne(createCourseInput.teacherId);
 
     const course = this.courseRepository.create({
-      name: createCourseDto.name,
+      name: createCourseInput.name,
       subject,
       teacher,
-      schedule: createCourseDto.schedule,
-      capacity: createCourseDto.capacity ?? 30,
-      room: createCourseDto.room,
+      schedule: createCourseInput.schedule,
+      capacity: createCourseInput.capacity ?? 30,
+      room: createCourseInput.room,
     });
     return this.courseRepository.save(course);
   }
 
-  async update(id: number, updateCourseDto: UpdateCourseDto) {
+  async update(id: number, updateCourseInput: UpdateCourseInput) {
     const course = await this.findOne(id);
 
-    if (updateCourseDto.subjectId) {
-      course.subject = await this.subjectsService.findOne(updateCourseDto.subjectId);
+    if (updateCourseInput.subjectId) {
+      course.subject = await this.subjectsService.findOne(updateCourseInput.subjectId);
     }
 
-    if (updateCourseDto.teacherId) {
-      course.teacher = await this.teachersService.findOne(updateCourseDto.teacherId);
+    if (updateCourseInput.teacherId) {
+      course.teacher = await this.teachersService.findOne(updateCourseInput.teacherId);
     }
 
     Object.assign(course, {
-      name: updateCourseDto.name ?? course.name,
-      schedule: updateCourseDto.schedule ?? course.schedule,
-      capacity: updateCourseDto.capacity ?? course.capacity,
-      room: updateCourseDto.room ?? course.room,
+      name: updateCourseInput.name ?? course.name,
+      schedule: updateCourseInput.schedule ?? course.schedule,
+      capacity: updateCourseInput.capacity ?? course.capacity,
+      room: updateCourseInput.room ?? course.room,
     });
 
     return this.courseRepository.save(course);

@@ -14,13 +14,13 @@ export class FinanceRecordModel {
   @Field(() => Float)
   amount: number;
 
-  @Field()
+  @Field(() => String)
   concept: string;
 
-  @Field()
+  @Field(() => String)
   date: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   notes?: string | null;
 
   @Field(() => Date)

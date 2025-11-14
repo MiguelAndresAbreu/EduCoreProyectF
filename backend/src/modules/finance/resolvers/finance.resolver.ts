@@ -7,7 +7,7 @@ import {
   FinanceRecordModel,
   FinanceTotalsModel,
 } from '../models/finance-record.model';
-import { CreateFinanceRecordInput } from '../models/create-finance-record.input';
+import { CreateFinanceRecordInput } from '../inputs/create-finance-record.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';

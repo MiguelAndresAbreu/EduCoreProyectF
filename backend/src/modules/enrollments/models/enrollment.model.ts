@@ -17,7 +17,7 @@ export class EnrollmentModel {
   @Field(() => Date)
   enrolledAt: Date;
 
-  @Field()
+  @Field(() => String)
   status: string;
 
   static fromEntity(

@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Teacher } from './entities/teacher.entity';
-import { CreateTeacherInput } from './dto/create-teacher.input';
-import { UpdateTeacherInput } from './dto/update-teacher.input';
+import { CreateTeacherInput } from './inputs/create-teacher.input';
+import { UpdateTeacherInput } from './inputs/update-teacher.input';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/entities/user.entity';
 

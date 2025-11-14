@@ -1,20 +1,20 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AttendanceModel } from '../../attendance/models/attendance.model';
 import { GradeModel } from '../../grades/models/grade.model';
 import { PaymentModel } from '../../payments/models/payment.model';
 
 @ObjectType()
 export class AttendanceSummaryModel {
-  @Field()
+  @Field(() => Int)
   total: number;
 
-  @Field()
+  @Field(() => Int)
   present: number;
 
-  @Field()
+  @Field(() => Int)
   absent: number;
 
-  @Field()
+  @Field(() => Int)
   late: number;
 
   @Field(() => Float)

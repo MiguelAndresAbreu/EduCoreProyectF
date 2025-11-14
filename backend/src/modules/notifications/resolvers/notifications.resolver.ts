@@ -8,7 +8,7 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { CreateNotificationInput } from '../models/notification.input';
+import { CreateNotificationInput } from '../inputs/notification.input';
 
 @Resolver(() => NotificationModel)
 export class NotificationsResolver {

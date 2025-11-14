@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Attendance, AttendanceStatus } from './entities/attendance.entity';
-import { CreateAttendanceDto } from './dto/create-attendance.dto';
+import { RecordAttendanceInput } from './inputs/record-attendance.input';
 import { CoursesService } from '../courses/courses.service';
 import { StudentsService } from '../students/students.service';
 import { TeachersService } from '../teachers/teachers.service';
@@ -17,15 +17,13 @@ export class AttendanceService {
     private readonly teachersService: TeachersService,
   ) {}
 
-  async registerAttendance(
-    createAttendanceDto: CreateAttendanceDto,
-  ) {
-    const course = await this.coursesService.findOne(createAttendanceDto.courseId);
-    const student = await this.studentsService.findOne(createAttendanceDto.studentId);
-    if (!createAttendanceDto.teacherId) {
+  async registerAttendance(recordAttendanceInput: RecordAttendanceInput) {
+    const course = await this.coursesService.findOne(recordAttendanceInput.courseId);
+    const student = await this.studentsService.findOne(recordAttendanceInput.studentId);
+    if (!recordAttendanceInput.teacherId) {
       throw new BadRequestException('Debe indicar el docente que registra la asistencia');
     }
-    const teacher = await this.teachersService.findOne(createAttendanceDto.teacherId);
+    const teacher = await this.teachersService.findOne(recordAttendanceInput.teacherId);
 
     if (course.teacher.id !== teacher.id) {
       throw new BadRequestException('El docente no está asignado a este curso');
@@ -35,7 +33,7 @@ export class AttendanceService {
       where: {
         course: { id: course.id },
         student: { id: student.id },
-        date: createAttendanceDto.date,
+        date: recordAttendanceInput.date,
       },
     });
 
@@ -47,8 +45,8 @@ export class AttendanceService {
       course,
       student,
       teacher,
-      date: createAttendanceDto.date,
-      status: createAttendanceDto.status,
+      date: recordAttendanceInput.date,
+      status: recordAttendanceInput.status,
     });
 
     return this.attendanceRepository.save(attendance);

@@ -1,8 +1,8 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { GradesService } from '../grades.service';
-import { GradeModel } from '../models/grade.model';
-import { CreateGradeInput } from '../models/grade.input';
+import { GradeModel, GradeReportModel } from '../models/grade.model';
+import { CreateGradeInput, UpdateGradeInput } from '../inputs/grade.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -29,13 +29,32 @@ export class GradesResolver {
     @Args('input') input: CreateGradeInput,
     @CurrentUser() user: JwtPayload,
   ): Promise<GradeModel> {
-    if (user.role === UserRole.TEACHER && user.sub !== input.teacherId) {
-      throw new ForbiddenException('Solo puedes registrar calificaciones para tus cursos');
+    if (user.role === UserRole.TEACHER) {
+      const teacher = await this.teachersService.findByUserId(user.sub);
+      if (!teacher) {
+        throw new ForbiddenException('No autorizado para registrar calificaciones');
+      }
+      input.teacherId = teacher.id;
     }
     const grade = await this.gradesService.create(input);
     const model = GradeModel.fromEntity(grade);
     if (!model) {
       throw new Error('No se pudo crear la calificación');
+    }
+    return model;
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Mutation(() => GradeModel)
+  async updateGrade(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('input') input: UpdateGradeInput,
+  ): Promise<GradeModel> {
+    const updated = await this.gradesService.update(id, input);
+    const model = GradeModel.fromEntity(updated);
+    if (!model) {
+      throw new Error('Calificación no encontrada');
     }
     return model;
   }
@@ -77,5 +96,33 @@ export class GradesResolver {
     return grades
       .map((grade) => GradeModel.fromEntity(grade))
       .filter((item): item is GradeModel => item !== null);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Query(() => GradeReportModel)
+  async gradesReport(
+    @Args('courseId', { type: () => Int, nullable: true }) courseId?: number,
+    @Args('studentId', { type: () => Int, nullable: true }) studentId?: number,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
+  ): Promise<GradeReportModel> {
+    const report = await this.gradesService.report({
+      courseId,
+      studentId,
+      startDate,
+      endDate,
+    });
+
+    return {
+      grades: report.data
+        .map((grade) => GradeModel.fromEntity(grade))
+        .filter((item): item is GradeModel => item !== null),
+      average: report.average,
+      averagesByStudent: report.averagesByStudent.map((item) => ({
+        studentId: item.studentId,
+        average: item.average,
+      })),
+    };
   }
 }

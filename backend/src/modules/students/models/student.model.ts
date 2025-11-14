@@ -13,10 +13,10 @@ export class StudentModel {
   @Field(() => Date)
   enrollmentDate: Date;
 
-  @Field()
+  @Field(() => String)
   status: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   gradeLevel?: string | null;
 
   static fromEntity(entity: Student | null | undefined): StudentModel | null {

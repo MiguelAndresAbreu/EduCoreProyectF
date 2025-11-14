@@ -16,10 +16,10 @@ export class PaymentModel {
   @Field(() => Float)
   amount: number;
 
-  @Field()
+  @Field(() => String)
   concept: string;
 
-  @Field()
+  @Field(() => String)
   paymentDate: string;
 
   @Field(() => PaymentMethod)

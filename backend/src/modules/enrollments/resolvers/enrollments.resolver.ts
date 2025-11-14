@@ -2,7 +2,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { EnrollmentsService } from '../enrollments.service';
 import { EnrollmentModel } from '../models/enrollment.model';
-import { CreateEnrollmentInput } from '../dto/create-enrollment.input';
+import { CreateEnrollmentInput } from '../inputs/create-enrollment.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';

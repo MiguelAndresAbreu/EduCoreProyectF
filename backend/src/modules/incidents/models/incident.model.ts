@@ -15,10 +15,10 @@ export class IncidentModel {
   @Field(() => UserModel, { nullable: true })
   reported?: UserModel | null;
 
-  @Field()
+  @Field(() => String)
   description: string;
 
-  @Field()
+  @Field(() => String)
   date: string;
 
   @Field(() => IncidentStatus)
