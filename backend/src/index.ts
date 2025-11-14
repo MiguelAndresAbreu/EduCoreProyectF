@@ -18,8 +18,14 @@ async function bootstrap() {
     }),
   );
 
+  const allowedOrigins =
+    process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) ?? [
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ];
+
   app.enableCors({
-    origin: 'http://localhost:5174', // tu frontend
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
