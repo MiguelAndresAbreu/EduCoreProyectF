@@ -64,6 +64,7 @@ export default function Register() {
     try {
       const { data } = await http.post("/auth/register", payload);
       localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
       localStorage.removeItem("rememberUser");
       navigate("/dashboard", { replace: true });
     } catch (err) {
