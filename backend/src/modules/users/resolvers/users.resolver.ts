@@ -2,16 +2,14 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { UsersService } from '../users.service';
 import { UserModel } from '../models/user.model';
-import { CreateUserInput } from '../models/create-user.input';
-import { UpdateUserInput } from '../models/update-user.input';
+import { CreateUserInput } from '../dto/create-user.input';
+import { UpdateUserInput } from '../dto/update-user.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../entities/user.entity';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Resolver(() => UserModel)
 export class UsersResolver {
@@ -21,7 +19,7 @@ export class UsersResolver {
   @Roles(UserRole.ADMIN)
   @Mutation(() => UserModel)
   async createUser(@Args('input') input: CreateUserInput): Promise<UserModel> {
-    const user = await this.usersService.create(input as CreateUserDto);
+    const user = await this.usersService.create(input);
     const model = UserModel.fromEntity(user);
     if (!model) {
       throw new Error('No se pudo crear el usuario');
@@ -62,7 +60,7 @@ export class UsersResolver {
       throw new ForbiddenException('No puedes modificar otro usuario');
     }
 
-    const payload: UpdateUserDto = {} as UpdateUserDto;
+    const payload: UpdateUserInput = {} as UpdateUserInput;
 
     if (currentUser.role === UserRole.ADMIN) {
       Object.assign(payload, input);

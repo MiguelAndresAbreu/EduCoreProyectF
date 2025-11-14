@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Teacher } from './entities/teacher.entity';
-import { CreateTeacherDto } from './dto/create-teacher.dto';
-import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { CreateTeacherInput } from './dto/create-teacher.input';
+import { UpdateTeacherInput } from './dto/update-teacher.input';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/entities/user.entity';
 
@@ -37,8 +37,8 @@ export class TeachersService {
     });
   }
 
-  async create(createTeacherDto: CreateTeacherDto) {
-    const user = await this.usersService.findById(createTeacherDto.userId);
+  async create(createTeacherInput: CreateTeacherInput) {
+    const user = await this.usersService.findById(createTeacherInput.userId);
     if (user.role !== UserRole.TEACHER && user.role !== UserRole.ADMIN) {
       throw new BadRequestException('El usuario no puede ser docente');
     }
@@ -51,16 +51,16 @@ export class TeachersService {
     const teacher = this.teacherRepository.create({
       user,
       person: user.person,
-      hireDate: createTeacherDto.hireDate,
-      subjects: createTeacherDto.subjects,
+      hireDate: createTeacherInput.hireDate,
+      subjects: createTeacherInput.subjects ?? [],
     });
 
     return this.teacherRepository.save(teacher);
   }
 
-  async update(id: number, updateTeacherDto: UpdateTeacherDto) {
+  async update(id: number, updateTeacherInput: UpdateTeacherInput) {
     const teacher = await this.findOne(id);
-    Object.assign(teacher, updateTeacherDto);
+    Object.assign(teacher, updateTeacherInput);
     return this.teacherRepository.save(teacher);
   }
 }

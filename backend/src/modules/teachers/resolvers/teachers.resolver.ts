@@ -2,14 +2,12 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { TeachersService } from '../teachers.service';
 import { TeacherModel } from '../models/teacher.model';
-import { CreateTeacherInput } from '../models/create-teacher.input';
-import { UpdateTeacherInput } from '../models/update-teacher.input';
+import { CreateTeacherInput } from '../dto/create-teacher.input';
+import { UpdateTeacherInput } from '../dto/update-teacher.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CreateTeacherDto } from '../dto/create-teacher.dto';
-import { UpdateTeacherDto } from '../dto/update-teacher.dto';
 
 @Resolver(() => TeacherModel)
 export class TeachersResolver {
@@ -21,7 +19,7 @@ export class TeachersResolver {
   async createTeacher(
     @Args('input') input: CreateTeacherInput,
   ): Promise<TeacherModel> {
-    const teacher = await this.teachersService.create(input as CreateTeacherDto);
+    const teacher = await this.teachersService.create(input);
     const model = TeacherModel.fromEntity(teacher);
     if (!model) {
       throw new Error('No se pudo crear el docente');
@@ -60,7 +58,7 @@ export class TeachersResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('input') input: UpdateTeacherInput,
   ): Promise<TeacherModel> {
-    const teacher = await this.teachersService.update(id, input as UpdateTeacherDto);
+    const teacher = await this.teachersService.update(id, input);
     const model = TeacherModel.fromEntity(teacher);
     if (!model) {
       throw new Error('Docente no encontrado');

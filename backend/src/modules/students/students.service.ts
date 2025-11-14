@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from './entities/student.entity';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateStudentInput } from './dto/create-student.input';
+import { UpdateStudentInput } from './dto/update-student.input';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/entities/user.entity';
 
@@ -47,8 +47,8 @@ export class StudentsService {
     });
   }
 
-  async create(createStudentDto: CreateStudentDto) {
-    const user = await this.usersService.findById(createStudentDto.userId);
+  async create(createStudentInput: CreateStudentInput) {
+    const user = await this.usersService.findById(createStudentInput.userId);
     if (user.role !== UserRole.STUDENT && user.role !== UserRole.ADMIN) {
       throw new BadRequestException('El usuario no puede ser estudiante');
     }
@@ -61,16 +61,16 @@ export class StudentsService {
     const student = this.studentRepository.create({
       user,
       person: user.person,
-      gradeLevel: createStudentDto.gradeLevel,
-      status: createStudentDto.status ?? 'ACTIVE',
+      gradeLevel: createStudentInput.gradeLevel,
+      status: createStudentInput.status ?? 'ACTIVE',
     });
 
     return this.studentRepository.save(student);
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto) {
+  async update(id: number, updateStudentInput: UpdateStudentInput) {
     const student = await this.findOne(id);
-    Object.assign(student, updateStudentDto);
+    Object.assign(student, updateStudentInput);
     return this.studentRepository.save(student);
   }
 }

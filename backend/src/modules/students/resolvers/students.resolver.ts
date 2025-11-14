@@ -2,14 +2,12 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { StudentsService } from '../students.service';
 import { StudentModel } from '../models/student.model';
-import { CreateStudentInput } from '../models/create-student.input';
-import { UpdateStudentInput } from '../models/update-student.input';
+import { CreateStudentInput } from '../dto/create-student.input';
+import { UpdateStudentInput } from '../dto/update-student.input';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CreateStudentDto } from '../dto/create-student.dto';
-import { UpdateStudentDto } from '../dto/update-student.dto';
 
 @Resolver(() => StudentModel)
 export class StudentsResolver {
@@ -21,7 +19,7 @@ export class StudentsResolver {
   async createStudent(
     @Args('input') input: CreateStudentInput,
   ): Promise<StudentModel> {
-    const student = await this.studentsService.create(input as CreateStudentDto);
+    const student = await this.studentsService.create(input);
     const model = StudentModel.fromEntity(student);
     if (!model) {
       throw new Error('No se pudo crear el estudiante');
@@ -60,7 +58,7 @@ export class StudentsResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('input') input: UpdateStudentInput,
   ): Promise<StudentModel> {
-    const student = await this.studentsService.update(id, input as UpdateStudentDto);
+    const student = await this.studentsService.update(id, input);
     const model = StudentModel.fromEntity(student);
     if (!model) {
       throw new Error('Estudiante no encontrado');
