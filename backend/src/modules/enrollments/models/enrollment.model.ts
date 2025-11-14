@@ -35,9 +35,9 @@ export class EnrollmentModel {
     }
     model.student = student;
     model.course =
-      options?.includeCourse === false
-        ? null
-        : CourseModel.fromEntity(entity.course, { includeEnrollments: false });
+      options?.includeCourse === true
+        ? CourseModel.fromEntity(entity.course, { includeEnrollments: false })
+        : null;
     model.enrolledAt = entity.enrolledAt;
     model.status = entity.status;
     return model;

@@ -59,7 +59,9 @@ export class UserProfileModel {
     model.student = profile.student ? StudentModel.fromEntity(profile.student) : null;
     model.enrollments = Array.isArray(profile.enrollments)
       ? profile.enrollments
-          .map((enrollment: any) => EnrollmentModel.fromEntity(enrollment))
+          .map((enrollment: any) =>
+            EnrollmentModel.fromEntity(enrollment, { includeCourse: true }),
+          )
           .filter((item: EnrollmentModel | null): item is EnrollmentModel => item !== null)
       : null;
     model.grades = Array.isArray(profile.grades)
