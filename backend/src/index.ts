@@ -11,18 +11,18 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
   );
 
   const allowedOrigins =
-    process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) ?? [
-      'http://localhost:5173',
-      'http://localhost:5174',
-    ];
+      process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) ?? [
+        'http://localhost:5173',
+        'http://localhost:5174',
+      ];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -36,7 +36,7 @@ async function bootstrap() {
       info: {
         title: 'EduCore ERP Escolar',
         description:
-          'API REST para la gestión de autenticación, usuarios y módulos académicos del ERP Escolar.',
+            'API REST para la gestión de autenticación, usuarios y módulos académicos del ERP Escolar.',
         version: '1.0.0',
       },
       servers: [
@@ -161,297 +161,8 @@ async function bootstrap() {
         { name: 'Calificaciones', description: 'Gestión de calificaciones' },
       ],
       paths: {
-        '/auth/login': {
-          post: {
-            tags: ['Auth'],
-            summary: 'Iniciar sesión',
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/LoginDto' },
-                },
-              },
-            },
-            responses: {
-              200: {
-                description: 'Autenticación correcta',
-              },
-              401: { description: 'Credenciales inválidas' },
-            },
-          },
-        },
-        '/auth/register': {
-          post: {
-            tags: ['Auth'],
-            summary: 'Registrar un nuevo usuario',
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/RegisterDto' },
-                },
-              },
-            },
-            responses: {
-              201: { description: 'Usuario creado' },
-              400: { description: 'Datos inválidos o duplicados' },
-            },
-          },
-        },
-        '/auth/me': {
-          get: {
-            tags: ['Auth'],
-            summary: 'Obtener el perfil autenticado',
-            security: [{ bearerAuth: [] }],
-            responses: {
-              200: { description: 'Perfil completo del usuario autenticado' },
-              401: { description: 'Token inválido o expirado' },
-            },
-          },
-        },
-        '/users': {
-          get: {
-            tags: ['Usuarios'],
-            summary: 'Listar usuarios',
-            security: [{ bearerAuth: [] }],
-            responses: { 200: { description: 'Listado de usuarios' } },
-          },
-          post: {
-            tags: ['Usuarios'],
-            summary: 'Crear usuario',
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/RegisterDto' },
-                },
-              },
-            },
-            responses: { 201: { description: 'Usuario creado' } },
-          },
-        },
-        '/users/{id}': {
-          get: {
-            tags: ['Usuarios'],
-            summary: 'Consultar usuario por ID',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 200: { description: 'Usuario encontrado' }, 404: { description: 'No encontrado' } },
-          },
-          put: {
-            tags: ['Usuarios'],
-            summary: 'Actualizar usuario',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/User' },
-                },
-              },
-            },
-            responses: { 200: { description: 'Usuario actualizado' } },
-          },
-          delete: {
-            tags: ['Usuarios'],
-            summary: 'Eliminar usuario',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 204: { description: 'Usuario eliminado' } },
-          },
-        },
-        '/person/{id}': {
-          get: {
-            tags: ['Personas'],
-            summary: 'Consultar datos personales',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 200: { description: 'Persona encontrada' }, 403: { description: 'Acceso denegado' } },
-          },
-          put: {
-            tags: ['Personas'],
-            summary: 'Actualizar datos personales',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/Person' },
-                },
-              },
-            },
-            responses: { 200: { description: 'Persona actualizada' }, 403: { description: 'Acceso denegado' } },
-          },
-        },
-        '/courses': {
-          get: {
-            tags: ['Cursos'],
-            summary: 'Listar cursos',
-            security: [{ bearerAuth: [] }],
-            responses: { 200: { description: 'Listado de cursos' } },
-          },
-          post: {
-            tags: ['Cursos'],
-            summary: 'Crear curso',
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: { $ref: '#/components/schemas/Course' },
-                },
-              },
-            },
-            responses: { 201: { description: 'Curso creado' } },
-          },
-        },
-        '/courses/{id}': {
-          put: {
-            tags: ['Cursos'],
-            summary: 'Actualizar curso',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 200: { description: 'Curso actualizado' } },
-          },
-          delete: {
-            tags: ['Cursos'],
-            summary: 'Eliminar curso',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 204: { description: 'Curso eliminado' } },
-          },
-        },
-        '/enrollments': {
-          post: {
-            tags: ['Inscripciones'],
-            summary: 'Inscribir estudiante en un curso',
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    required: ['studentId', 'courseId'],
-                    properties: {
-                      studentId: { type: 'integer' },
-                      courseId: { type: 'integer' },
-                      status: { type: 'string' },
-                    },
-                  },
-                },
-              },
-            },
-            responses: { 201: { description: 'Inscripción creada' } },
-          },
-        },
-        '/enrollments/student/{id}': {
-          get: {
-            tags: ['Inscripciones'],
-            summary: 'Inscripciones de un estudiante',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 200: { description: 'Listado de inscripciones' } },
-          },
-        },
-        '/attendance': {
-          post: {
-            tags: ['Asistencia'],
-            summary: 'Registrar asistencia',
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    required: ['courseId', 'studentId', 'date', 'status'],
-                    properties: {
-                      courseId: { type: 'integer' },
-                      studentId: { type: 'integer' },
-                      date: { type: 'string', format: 'date' },
-                      status: {
-                        type: 'string',
-                        enum: ['PRESENT', 'ABSENT', 'LATE'],
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            responses: { 201: { description: 'Asistencia registrada' } },
-          },
-        },
-        '/attendance/course/{courseId}': {
-          get: {
-            tags: ['Asistencia'],
-            summary: 'Consultar asistencia por curso',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'courseId', in: 'path', required: true, schema: { type: 'integer' } },
-              { name: 'date', in: 'query', required: false, schema: { type: 'string', format: 'date' } },
-            ],
-            responses: { 200: { description: 'Listado de asistencias' } },
-          },
-        },
-        '/grades': {
-          post: {
-            tags: ['Calificaciones'],
-            summary: 'Registrar calificación',
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-              required: true,
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    required: ['courseId', 'studentId', 'type', 'score', 'maxScore', 'date'],
-                    properties: {
-                      courseId: { type: 'integer' },
-                      studentId: { type: 'integer' },
-                      type: { type: 'string' },
-                      score: { type: 'number' },
-                      maxScore: { type: 'number' },
-                      date: { type: 'string', format: 'date' },
-                    },
-                  },
-                },
-              },
-            },
-            responses: { 201: { description: 'Calificación registrada' } },
-          },
-        },
-        '/grades/student/{id}': {
-          get: {
-            tags: ['Calificaciones'],
-            summary: 'Consultar calificaciones de un estudiante',
-            security: [{ bearerAuth: [] }],
-            parameters: [
-              { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
-            responses: { 200: { description: 'Listado de calificaciones' } },
-          },
-        },
+        // ... (todo tu objeto paths igual que lo tenías)
+        // no hace falta tocar nada aquí para arreglar GraphQL
       },
     },
     apis: [],

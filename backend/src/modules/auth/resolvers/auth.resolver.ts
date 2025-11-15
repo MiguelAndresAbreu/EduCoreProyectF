@@ -5,9 +5,9 @@ import { AuthPayloadModel } from '../models/auth.model';
 import { LoginInput } from '../inputs/login.input';
 import { RegisterInput } from '../inputs/register.input';
 import { UserProfileModel } from '../../profile/models/user-profile.model';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver()
 export class AuthResolver {

@@ -33,3 +33,4 @@ export class UpdateCourseInput {
   @IsString()
   room?: string;
 }
+

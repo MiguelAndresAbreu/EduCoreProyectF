@@ -4,10 +4,10 @@ import { SubjectsService } from '../subjects.service';
 import { SubjectModel } from '../models/subject.model';
 import { CreateSubjectInput } from '../inputs/create-subject.input';
 import { UpdateSubjectInput } from '../inputs/update-subject.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver(() => SubjectModel)
 export class SubjectsResolver {

@@ -2,13 +2,13 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { NotificationsService } from '../notifications.service';
 import { NotificationModel } from '../models/notification.model';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { CreateNotificationInput } from '../inputs/notification.input';
+import {Roles} from "@/common/decorators/roles.decorator";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => NotificationModel)
 export class NotificationsResolver {

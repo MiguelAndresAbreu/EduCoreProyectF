@@ -4,10 +4,10 @@ import { StudentsService } from '../students.service';
 import { StudentModel } from '../models/student.model';
 import { CreateStudentInput } from '../inputs/create-student.input';
 import { UpdateStudentInput } from '../inputs/update-student.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver(() => StudentModel)
 export class StudentsResolver {

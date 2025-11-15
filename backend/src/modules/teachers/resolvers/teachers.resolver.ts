@@ -4,10 +4,10 @@ import { TeachersService } from '../teachers.service';
 import { TeacherModel } from '../models/teacher.model';
 import { CreateTeacherInput } from '../inputs/create-teacher.input';
 import { UpdateTeacherInput } from '../inputs/update-teacher.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver(() => TeacherModel)
 export class TeachersResolver {

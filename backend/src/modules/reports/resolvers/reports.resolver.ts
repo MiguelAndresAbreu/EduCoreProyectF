@@ -6,18 +6,17 @@ import {
   GradesReportModel,
   PaymentsReportModel,
   PerformanceReportModel,
-  PaymentsTotalsModel,
 } from '../models/report.models';
 import { AttendanceModel } from '../../attendance/models/attendance.model';
 import { GradeModel } from '../../grades/models/grade.model';
-import { PaymentModel } from '../../payments/models/payment.model';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import {PaymentModel, PaymentsTotalsModel} from '../../payments/models/payment.model';
 import { UserRole } from '../../users/entities/user.entity';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { StudentsService } from '../../students/students.service';
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver()
 export class ReportsResolver {

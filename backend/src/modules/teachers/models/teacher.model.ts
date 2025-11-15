@@ -10,7 +10,7 @@ export class TeacherModel {
   @Field(() => PersonModel)
   person: PersonModel;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   hireDate?: string | null;
 
   @Field(() => [String], { nullable: true })

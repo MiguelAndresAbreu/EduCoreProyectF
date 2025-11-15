@@ -2,12 +2,12 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { PersonModel } from '../models/person.model';
 import { PersonService } from '../person.service';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { UsersService } from '../../users/users.service';
 import { UserRole } from '../../users/entities/user.entity';
 import { UpdatePersonInput } from '../inputs/update-person.input';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => PersonModel)
 export class PersonResolver {

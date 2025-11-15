@@ -18,50 +18,49 @@ export class CourseModel {
   @Field(() => TeacherModel)
   teacher: TeacherModel;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true })   // 👈 tipo explícito
   schedule?: string | null;
 
   @Field(() => Int)
   capacity: number;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true })   // 👈 tipo explícito
   room?: string | null;
 
-  @Field(
-    () =>
-      import('../../enrollments/models/enrollment.model').then(
-        (m) => m.EnrollmentModel,
-      ),
-    { nullable: true },
-  )
-  enrollments?: (EnrollmentModel | null)[] | null;
+  @Field(() => [EnrollmentModel], { nullable: true })
+  enrollments?: EnrollmentModel[] | null;
 
   static fromEntity(
-    entity: Course | null | undefined,
-    options?: { includeEnrollments?: boolean },
+      entity: Course | null | undefined,
+      options?: { includeEnrollments?: boolean },
   ): CourseModel {
     if (!entity) {
       throw new Error('Course entity not found');
     }
+
     const model = new CourseModel();
     model.id = entity.id;
     model.name = entity.name;
     model.subject = SubjectModel.fromEntity(entity.subject);
+
     const teacher = TeacherModel.fromEntity(entity.teacher);
     if (!teacher) {
       throw new Error('Course entity is missing teacher relation');
     }
     model.teacher = teacher;
+
     model.schedule = entity.schedule ?? null;
     model.capacity = entity.capacity;
     model.room = entity.room ?? null;
-    if (options?.includeEnrollments === true && Array.isArray(entity.enrollments)) {
-      model.enrollments = entity.enrollments
-        .map((enrollment) => EnrollmentModel.fromEntity(enrollment, { includeCourse: false }))
-        .filter((item): item is EnrollmentModel => item !== null);
+
+    if (options?.includeEnrollments) {
+      model.enrollments = (entity.enrollments ?? []).map((enrollment) =>
+          EnrollmentModel.fromEntity(enrollment, { includeCourse: false }),
+      );
     } else {
       model.enrollments = null;
     }
+
     return model;
   }
 }

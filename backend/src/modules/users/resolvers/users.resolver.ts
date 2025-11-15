@@ -4,12 +4,12 @@ import { UsersService } from '../users.service';
 import { UserModel } from '../models/user.model';
 import { CreateUserInput } from '../inputs/create-user.input';
 import { UpdateUserInput } from '../inputs/update-user.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../entities/user.entity';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => UserModel)
 export class UsersResolver {

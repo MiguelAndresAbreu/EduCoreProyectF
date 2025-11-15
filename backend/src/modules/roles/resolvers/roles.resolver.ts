@@ -1,10 +1,10 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { RolesService } from '../roles.service';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver()
 export class RolesResolver {

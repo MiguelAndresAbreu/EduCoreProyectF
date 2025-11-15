@@ -2,16 +2,15 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { FinanceService } from '../finance.service';
 import {
-  FinanceDashboardModel,
   FinanceOverviewModel,
   FinanceRecordModel,
-  FinanceTotalsModel,
 } from '../models/finance-record.model';
 import { CreateFinanceRecordInput } from '../inputs/create-finance-record.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+
 import { UserRole } from '../../users/entities/user.entity';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver(() => FinanceRecordModel)
 export class FinanceResolver {

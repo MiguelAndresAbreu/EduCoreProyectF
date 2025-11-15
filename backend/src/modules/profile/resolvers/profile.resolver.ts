@@ -3,12 +3,12 @@ import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { PersonService } from '../../person/person.service';
 import { UsersService } from '../../users/users.service';
 import { ProfileService } from '../profile.service';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { UpdateProfileInput } from '../models/update-profile.input';
 import { UserProfileModel } from '../models/user-profile.model';
 import { UserRole } from '../../users/entities/user.entity';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => UserProfileModel)
 export class ProfileResolver {

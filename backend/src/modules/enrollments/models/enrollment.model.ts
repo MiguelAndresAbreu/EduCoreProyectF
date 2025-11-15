@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { Enrollment } from '../entities/enrollment.entity';
 import { CourseModel } from '../../courses/models/course.model';
 import { StudentModel } from '../../students/models/student.model';
@@ -11,39 +11,40 @@ export class EnrollmentModel {
   @Field(() => StudentModel)
   student: StudentModel;
 
-  @Field(
-    () =>
-      import('../../courses/models/course.model').then((m) => m.CourseModel),
-    { nullable: true },
-  )
+  @Field(() => CourseModel, { nullable: true })
   course?: CourseModel | null;
 
-  @Field(() => Date)
+  @Field(() => GraphQLISODateTime)
   enrolledAt: Date;
 
   @Field(() => String)
   status: string;
 
   static fromEntity(
-    entity: Enrollment | null | undefined,
-    options?: { includeCourse?: boolean },
+      entity: Enrollment | null | undefined,
+      options?: { includeCourse?: boolean },
   ): EnrollmentModel {
     if (!entity) {
       throw new Error('Enrollment entity not found');
     }
+
     const model = new EnrollmentModel();
     model.id = entity.id;
+
     const student = StudentModel.fromEntity(entity.student);
     if (!student) {
       throw new Error('Enrollment entity is missing student relation');
     }
     model.student = student;
+
     model.course =
-      options?.includeCourse === true
-        ? CourseModel.fromEntity(entity.course, { includeEnrollments: false })
-        : null;
+        options?.includeCourse === true
+            ? CourseModel.fromEntity(entity.course, { includeEnrollments: false })
+            : null;
+
     model.enrolledAt = entity.enrolledAt;
     model.status = entity.status;
+
     return model;
   }
 }

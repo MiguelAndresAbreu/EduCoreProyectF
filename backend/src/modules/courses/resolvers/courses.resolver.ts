@@ -4,10 +4,10 @@ import { CoursesService } from '../courses.service';
 import { CourseModel } from '../models/course.model';
 import { CreateCourseInput } from '../inputs/create-course.input';
 import { UpdateCourseInput } from '../inputs/update-course.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
 
 @Resolver(() => CourseModel)
 export class CoursesResolver {

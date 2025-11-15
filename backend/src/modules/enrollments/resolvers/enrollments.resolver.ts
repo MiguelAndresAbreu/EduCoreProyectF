@@ -3,13 +3,13 @@ import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { EnrollmentsService } from '../enrollments.service';
 import { EnrollmentModel } from '../models/enrollment.model';
 import { CreateEnrollmentInput } from '../inputs/create-enrollment.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { StudentsService } from '../../students/students.service';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => EnrollmentModel)
 export class EnrollmentsResolver {

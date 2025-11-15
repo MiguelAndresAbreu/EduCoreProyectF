@@ -1,4 +1,12 @@
-import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  ID,
+  Int,
+  ObjectType,
+  registerEnumType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { Attendance, AttendanceStatus } from '../entities/attendance.entity';
 import { CourseModel } from '../../courses/models/course.model';
 import { StudentModel } from '../../students/models/student.model';
@@ -26,7 +34,7 @@ export class AttendanceModel {
   @Field(() => AttendanceStatus)
   status: AttendanceStatus;
 
-  @Field(() => Date)
+  @Field(() => GraphQLISODateTime)
   createdAt: Date;
 
   static fromEntity(entity: Attendance | null | undefined): AttendanceModel | null {

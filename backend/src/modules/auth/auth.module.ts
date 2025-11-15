@@ -21,6 +21,6 @@ import { AuthResolver } from './resolvers/auth.resolver';
   ],
   controllers: [],
   providers: [AuthService, JwtStrategy, AuthResolver],
-  exports: [AuthService],
+  exports: [],
 })
 export class AuthModule {}

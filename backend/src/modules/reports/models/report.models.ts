@@ -1,25 +1,7 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
-import { AttendanceModel } from '../../attendance/models/attendance.model';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
+import {AttendanceModel, AttendanceSummaryModel} from '../../attendance/models/attendance.model';
 import { GradeModel } from '../../grades/models/grade.model';
-import { PaymentModel } from '../../payments/models/payment.model';
-
-@ObjectType()
-export class AttendanceSummaryModel {
-  @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  present: number;
-
-  @Field(() => Int)
-  absent: number;
-
-  @Field(() => Int)
-  late: number;
-
-  @Field(() => Float)
-  attendanceRate: number;
-}
+import {PaymentModel, PaymentsTotalsModel} from "@/modules/payments/models/payment.model";
 
 @ObjectType()
 export class AttendanceReportModel {
@@ -49,18 +31,6 @@ export class GradesReportModel {
 
   @Field(() => [StudentAverageModel])
   averagesByStudent: StudentAverageModel[];
-}
-
-@ObjectType()
-export class PaymentsTotalsModel {
-  @Field(() => Float)
-  paid: number;
-
-  @Field(() => Float)
-  pending: number;
-
-  @Field(() => Float)
-  balance: number;
 }
 
 @ObjectType()

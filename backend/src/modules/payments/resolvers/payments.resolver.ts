@@ -3,13 +3,13 @@ import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { PaymentsService } from '../payments.service';
 import { PaymentModel, PaymentsTotalsModel, StudentPaymentsModel } from '../models/payment.model';
 import { CreatePaymentInput, UpdatePaymentInput } from '../inputs/payment.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
 import { StudentsService } from '../../students/students.service';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => PaymentModel)
 export class PaymentsResolver {

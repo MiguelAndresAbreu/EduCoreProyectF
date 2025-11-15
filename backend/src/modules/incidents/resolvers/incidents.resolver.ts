@@ -3,15 +3,15 @@ import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { IncidentsService } from '../incidents.service';
 import { IncidentModel } from '../models/incident.model';
 import { CreateIncidentInput, UpdateIncidentInput } from '../inputs/incident.input';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { IncidentStatus } from '../entities/incident.entity';
 import { StudentsService } from '../../students/students.service';
 import { TeachersService } from '../../teachers/teachers.service';
+import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
+import {RolesGuard} from "@/common/guards/roles.guard";
+import {Roles} from "@/common/decorators/roles.decorator";
+import {CurrentUser} from "@/common/decorators/current-user.decorator";
 
 @Resolver(() => IncidentModel)
 export class IncidentsResolver {
