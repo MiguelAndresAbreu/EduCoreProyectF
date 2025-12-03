@@ -105,7 +105,7 @@ export default function Grades() {
     try {
       const teacherId = Number(user?.teacher?.id ?? courseDetails?.teacher?.id);
       await createGradeMutation({
-        courseId: selectedCourseId,
+        courseId: Number(selectedCourseId),
         studentId: Number(formData.studentId),
         teacherId,
         type: formData.type,

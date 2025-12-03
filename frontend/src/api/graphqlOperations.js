@@ -364,6 +364,9 @@ export async function createPayment(input) {
 
 export async function fetchCourse(courseId) {
   const id = Number(courseId);
+  if (!Number.isInteger(id)) {
+    throw new Error('courseId invalido para consultar curso');
+  }
   const data = await graphqlRequest(
     `query Course($id: Int!) {
       course(id: $id) {
@@ -394,6 +397,9 @@ export async function fetchCourse(courseId) {
 
 export async function fetchGradesByCourse(courseId) {
   const id = Number(courseId);
+  if (!Number.isInteger(id)) {
+    throw new Error('courseId invalido para calificaciones por curso');
+  }
   const data = await graphqlRequest(
     `query GradesByCourse($courseId: Int!) {
       gradesByCourse(courseId: $courseId) {
