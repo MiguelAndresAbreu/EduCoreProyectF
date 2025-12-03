@@ -103,7 +103,7 @@ export default function Grades() {
     if (!selectedCourseId || !formData.studentId || !formData.value) return;
     setSaving(true);
     try {
-      const teacherId = user?.teacher?.id ?? courseDetails?.teacher?.id;
+      const teacherId = Number(user?.teacher?.id ?? courseDetails?.teacher?.id);
       await createGradeMutation({
         courseId: selectedCourseId,
         studentId: Number(formData.studentId),

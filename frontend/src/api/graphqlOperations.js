@@ -430,11 +430,23 @@ export async function fetchGradesByStudent(studentId) {
 }
 
 export async function createGrade(input) {
+  const normalized = {
+    ...input,
+    courseId: Number(input.courseId),
+    studentId: Number(input.studentId),
+    teacherId: input.teacherId !== undefined ? Number(input.teacherId) : undefined,
+  };
+  if (!Number.isInteger(normalized.courseId) || !Number.isInteger(normalized.studentId)) {
+    throw new Error('courseId o studentId invA!lido al crear calificaciA3n');
+  }
+  if (normalized.teacherId !== undefined && !Number.isInteger(normalized.teacherId)) {
+    throw new Error('teacherId invA!lido al crear calificaciA3n');
+  }
   const data = await graphqlRequest(
     `mutation CreateGrade($input: CreateGradeInput!) {
       createGrade(input: $input) { id }
     }`,
-    { input },
+    { input: normalized },
   );
   return data.createGrade;
 }
