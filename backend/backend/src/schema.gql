@@ -88,7 +88,7 @@ input CreateIncidentInput {
   date: String!
   description: String!
   reportedId: Int!
-  reporterId: Int!
+  reporterId: Int
   status: IncidentStatus
 }
 
@@ -516,7 +516,7 @@ type UserProfileModel {
   enrollments: [EnrollmentModel!]
   grades: [GradeModel!]
   id: ID!
-  isActive: Boolean!
+  isActive: Boolean
   person: PersonModel
   role: UserRole!
   student: StudentModel

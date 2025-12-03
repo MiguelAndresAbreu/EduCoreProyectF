@@ -19,7 +19,7 @@ export class Incident {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL', nullable: true  })
   @JoinColumn({ name: 'reporter_id' })
   reporter: User;
 

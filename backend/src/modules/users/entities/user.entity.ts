@@ -33,7 +33,7 @@ export class User {
   @Column('varchar', { select: false })
   password: string;
 
-  @Column('varchar', { default: true })
+  @Column({ type: 'bool', default: true })
   isActive: boolean;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
