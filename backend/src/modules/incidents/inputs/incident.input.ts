@@ -10,7 +10,7 @@ import { IncidentStatus } from '../entities/incident.entity';
 
 @InputType()
 export class CreateIncidentInput {
-  @Field(() => Int)
+  @Field(() => Int, {nullable: true })
   @IsInt()
   reporterId: number;
 

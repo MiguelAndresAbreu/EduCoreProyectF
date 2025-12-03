@@ -21,7 +21,7 @@ export class UserProfileModel {
   @Field(() => UserRole)
   role: UserRole;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   isActive: boolean;
 
   @Field(() => PersonModel, { nullable: true })
