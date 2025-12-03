@@ -1,0 +1,533 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AttendanceModel {
+  course: CourseModel!
+  createdAt: DateTime!
+  date: String!
+  id: ID!
+  status: AttendanceStatus!
+  student: StudentModel!
+  teacher: TeacherModel
+}
+
+type AttendanceReportModel {
+  records: [AttendanceModel!]!
+  summary: AttendanceSummaryModel!
+}
+
+type AttendanceResultModel {
+  records: [AttendanceModel!]!
+  summary: AttendanceSummaryModel!
+}
+
+enum AttendanceStatus {
+  ABSENT
+  LATE
+  PRESENT
+}
+
+type AttendanceSummaryModel {
+  absent: Int!
+  attendanceRate: Float!
+  late: Int!
+  present: Int!
+  total: Int!
+}
+
+type AuthPayloadModel {
+  accessToken: String!
+  user: UserProfileModel!
+}
+
+type CourseModel {
+  capacity: Int!
+  enrollments: [EnrollmentModel!]
+  id: ID!
+  name: String!
+  room: String
+  schedule: String
+  subject: SubjectModel!
+  teacher: TeacherModel!
+}
+
+input CreateCourseInput {
+  capacity: Int
+  name: String!
+  room: String
+  schedule: String
+  subjectId: Int!
+  teacherId: Int!
+}
+
+input CreateEnrollmentInput {
+  courseId: Int!
+  status: String
+  studentId: Int!
+}
+
+input CreateFinanceRecordInput {
+  amount: Float!
+  concept: String!
+  date: String!
+  notes: String
+  type: FinanceRecordType!
+}
+
+input CreateGradeInput {
+  courseId: Int!
+  date: String!
+  studentId: Int!
+  teacherId: Int
+  type: GradeType!
+  value: Float!
+}
+
+input CreateIncidentInput {
+  date: String!
+  description: String!
+  reportedId: Int!
+  reporterId: Int!
+  status: IncidentStatus
+}
+
+input CreateNotificationInput {
+  message: String!
+  recipientId: Int!
+  title: String!
+  type: NotificationType!
+}
+
+input CreatePaymentInput {
+  amount: Float!
+  concept: String!
+  method: PaymentMethod!
+  paymentDate: String!
+  status: PaymentStatus!
+  studentId: Int!
+}
+
+input CreateStudentInput {
+  gradeLevel: String
+  status: String
+  userId: Int!
+}
+
+input CreateSubjectInput {
+  code: String!
+  description: String
+  name: String!
+}
+
+input CreateTeacherInput {
+  hireDate: String
+  subjects: [String!]
+  userId: Int!
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  personId: Int
+  role: UserRole
+  username: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type EnrollmentModel {
+  course: CourseModel
+  enrolledAt: DateTime!
+  id: ID!
+  status: String!
+  student: StudentModel!
+}
+
+type FinanceDashboardModel {
+  daily: FinanceTotalsModel!
+  monthly: FinanceTotalsModel!
+  weekly: FinanceTotalsModel!
+}
+
+type FinanceOverviewModel {
+  balance: FinanceTotalsModel!
+  dashboard: FinanceDashboardModel!
+}
+
+type FinanceRecordModel {
+  amount: Float!
+  concept: String!
+  createdAt: DateTime!
+  date: String!
+  id: ID!
+  notes: String
+  type: FinanceRecordType!
+}
+
+enum FinanceRecordType {
+  EXPENSE
+  INCOME
+}
+
+type FinanceTotalsModel {
+  balance: Float!
+  expense: Float!
+  income: Float!
+}
+
+type GradeModel {
+  course: CourseModel!
+  createdAt: DateTime!
+  date: String!
+  id: ID!
+  student: StudentModel!
+  teacher: TeacherModel
+  type: GradeType!
+  value: Float!
+}
+
+type GradeReportModel {
+  average: Float!
+  averagesByStudent: [GradeStudentAverageModel!]!
+  grades: [GradeModel!]!
+}
+
+type GradeStudentAverageModel {
+  average: Float!
+  studentId: Int!
+}
+
+enum GradeType {
+  EXAM
+  HOMEWORK
+  PARTICIPATION
+  PROJECT
+  QUIZ
+}
+
+type GradesReportModel {
+  average: Float!
+  averagesByStudent: [StudentAverageModel!]!
+  data: [GradeModel!]!
+}
+
+type IncidentModel {
+  createdAt: DateTime!
+  date: String!
+  description: String!
+  id: ID!
+  reported: UserModel
+  reporter: UserModel
+  status: IncidentStatus!
+}
+
+enum IncidentStatus {
+  CLOSED
+  OPEN
+  REVIEW
+}
+
+input LoginInput {
+  identifier: String!
+  password: String!
+}
+
+type Mutation {
+  createCourse(input: CreateCourseInput!): CourseModel!
+  createEnrollment(input: CreateEnrollmentInput!): EnrollmentModel!
+  createFinanceRecord(input: CreateFinanceRecordInput!): FinanceRecordModel!
+  createGrade(input: CreateGradeInput!): GradeModel!
+  createIncident(input: CreateIncidentInput!): IncidentModel!
+  createNotification(input: CreateNotificationInput!): NotificationModel!
+  createPayment(input: CreatePaymentInput!): PaymentModel!
+  createStudent(input: CreateStudentInput!): StudentModel!
+  createSubject(input: CreateSubjectInput!): SubjectModel!
+  createTeacher(input: CreateTeacherInput!): TeacherModel!
+  createUser(input: CreateUserInput!): UserModel!
+  login(input: LoginInput!): AuthPayloadModel!
+  markAllNotificationsAsRead(userId: Int!): [NotificationModel!]!
+  markNotificationAsRead(id: Int!): NotificationModel!
+  recordAttendance(input: RecordAttendanceInput!): AttendanceModel!
+  register(input: RegisterInput!): AuthPayloadModel!
+  removeCourse(id: Int!): Boolean!
+  removeEnrollment(id: Int!): Boolean!
+  removeSubject(id: Int!): Boolean!
+  removeUser(id: Int!): Boolean!
+  updateCourse(id: Int!, input: UpdateCourseInput!): CourseModel!
+  updateGrade(id: Int!, input: UpdateGradeInput!): GradeModel!
+  updateIncident(id: Int!, input: UpdateIncidentInput!): IncidentModel!
+  updatePayment(id: Int!, input: UpdatePaymentInput!): PaymentModel!
+  updatePerson(id: Int!, input: UpdatePersonInput!): PersonModel!
+  updateProfile(input: UpdateProfileInput!, personId: Int!, userId: Int!): UserProfileModel!
+  updateStudent(id: Int!, input: UpdateStudentInput!): StudentModel!
+  updateSubject(id: Int!, input: UpdateSubjectInput!): SubjectModel!
+  updateTeacher(id: Int!, input: UpdateTeacherInput!): TeacherModel!
+  updateUser(id: Int!, input: UpdateUserInput!): UserModel!
+}
+
+type NotificationModel {
+  createdAt: DateTime!
+  id: ID!
+  message: String!
+  read: Boolean!
+  recipient: UserModel!
+  title: String!
+  type: NotificationType!
+}
+
+enum NotificationType {
+  ACADEMIC
+  PAYMENT
+  REMINDER
+  SYSTEM
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  TRANSFER
+}
+
+type PaymentModel {
+  amount: Float!
+  concept: String!
+  createdAt: DateTime!
+  id: ID!
+  method: PaymentMethod!
+  paymentDate: String!
+  status: PaymentStatus!
+  student: StudentModel!
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+}
+
+type PaymentsReportModel {
+  payments: [PaymentModel!]!
+  totals: PaymentsTotalsModel!
+}
+
+type PaymentsTotalsModel {
+  balance: Float!
+  paid: Float!
+  pending: Float!
+}
+
+type PerformanceReportModel {
+  attendance: AttendanceSummaryModel!
+  attendanceRate: Float!
+  averageGrade: Float!
+  financialStatus: PaymentsTotalsModel!
+  grades: [GradeModel!]!
+  payments: [PaymentModel!]!
+}
+
+type PersonModel {
+  address: String
+  avatar: String
+  birthDate: String
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  phone: String
+}
+
+type Query {
+  attendanceByCourse(courseId: Int!, date: String): AttendanceResultModel!
+  attendanceByStudent(endDate: String, startDate: String, studentId: Int!): AttendanceResultModel!
+  attendanceReport(courseId: Int, endDate: String, startDate: String, studentId: Int, teacherId: Int): AttendanceReportModel!
+  course(id: Int!): CourseModel!
+  courses: [CourseModel!]!
+  enrollmentsByStudent(studentId: Int!): [EnrollmentModel!]!
+  financeOverview: FinanceOverviewModel!
+  gradesByCourse(courseId: Int!): [GradeModel!]!
+  gradesByStudent(studentId: Int!): [GradeModel!]!
+  gradesReport(courseId: Int, endDate: String, startDate: String, studentId: Int): GradesReportModel!
+  incidents(status: IncidentStatus): [IncidentModel!]!
+  incidentsByStudent(studentId: Int!): [IncidentModel!]!
+  incidentsByTeacher(teacherId: Int!): [IncidentModel!]!
+  me: UserProfileModel!
+  notificationsByUser(userId: Int!): [NotificationModel!]!
+  paymentsByStudent(studentId: Int!): StudentPaymentsModel!
+  paymentsReport(endDate: String, startDate: String, studentId: Int): PaymentsReportModel!
+  person(id: Int!): PersonModel
+  roles: [UserRole!]!
+  student(id: Int!): StudentModel!
+  studentPerformance(studentId: Int!): PerformanceReportModel!
+  students: [StudentModel!]!
+  subject(id: Int!): SubjectModel!
+  subjects: [SubjectModel!]!
+  teacher(id: Int!): TeacherModel!
+  teachers: [TeacherModel!]!
+  user(id: Int!): UserModel!
+  users: [UserModel!]!
+}
+
+input RecordAttendanceInput {
+  courseId: Int!
+  date: String!
+  status: AttendanceStatus!
+  studentId: Int!
+  teacherId: Int!
+}
+
+input RegisterInput {
+  address: String
+  avatar: String
+  birthDate: String
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  phone: String
+  role: UserRole
+  username: String!
+}
+
+type StudentAverageModel {
+  average: Float!
+  studentId: ID!
+}
+
+type StudentModel {
+  enrollmentDate: DateTime!
+  gradeLevel: String
+  id: ID!
+  person: PersonModel!
+  status: String!
+}
+
+type StudentPaymentsModel {
+  accountStatus: PaymentsTotalsModel!
+  payments: [PaymentModel!]!
+}
+
+type SubjectModel {
+  code: String!
+  description: String
+  id: ID!
+  name: String!
+}
+
+type TeacherModel {
+  hireDate: String
+  id: ID!
+  person: PersonModel!
+  subjects: [String!]
+}
+
+input UpdateCourseInput {
+  capacity: Int
+  name: String
+  room: String
+  schedule: String
+  subjectId: Int
+  teacherId: Int
+}
+
+input UpdateGradeInput {
+  courseId: Int
+  date: String
+  studentId: Int
+  teacherId: Int
+  type: GradeType
+  value: Float
+}
+
+input UpdateIncidentInput {
+  date: String
+  description: String
+  reportedId: Int
+  reporterId: Int
+  status: IncidentStatus
+}
+
+input UpdatePaymentInput {
+  amount: Float
+  concept: String
+  method: PaymentMethod
+  paymentDate: String
+  status: PaymentStatus
+  studentId: Int
+}
+
+input UpdatePersonInput {
+  address: String
+  avatar: String
+  birthDate: String
+  email: String
+  firstName: String
+  lastName: String
+  phone: String
+}
+
+input UpdateProfileInput {
+  person: UpdatePersonInput!
+  user: UpdateUserInput
+}
+
+input UpdateStudentInput {
+  gradeLevel: String
+  status: String
+}
+
+input UpdateSubjectInput {
+  code: String
+  description: String
+  name: String
+}
+
+input UpdateTeacherInput {
+  hireDate: String
+  subjects: [String!]
+}
+
+input UpdateUserInput {
+  email: String
+  isActive: Boolean
+  password: String
+  role: UserRole
+  username: String
+}
+
+type UserModel {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  isActive: Boolean!
+  person: PersonModel
+  role: UserRole!
+  student: StudentModel
+  teacher: TeacherModel
+  updatedAt: DateTime!
+  username: String!
+}
+
+type UserProfileModel {
+  courses: [CourseModel!]
+  email: String!
+  enrollments: [EnrollmentModel!]
+  grades: [GradeModel!]
+  id: ID!
+  isActive: Boolean!
+  person: PersonModel
+  role: UserRole!
+  student: StudentModel
+  teacher: TeacherModel
+  username: String!
+}
+
+enum UserRole {
+  ADMIN
+  FINANCE
+  STAFF
+  STUDENT
+  TEACHER
+}

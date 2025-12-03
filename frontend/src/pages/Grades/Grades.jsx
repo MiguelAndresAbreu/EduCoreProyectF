@@ -39,8 +39,12 @@ export default function Grades() {
 
   useEffect(() => {
     if (isTeacher && Array.isArray(user?.courses)) {
-      setCourseOptions(user.courses);
-      setSelectedCourseId(user.courses[0]?.id ?? null);
+      const normalizedCourses = user.courses.map((course) => ({
+        ...course,
+        id: Number(course.id),
+      }));
+      setCourseOptions(normalizedCourses);
+      setSelectedCourseId(normalizedCourses[0]?.id ?? null);
     }
   }, [isTeacher, user]);
 
@@ -52,16 +56,18 @@ export default function Grades() {
 
   useEffect(() => {
     if (isStudent && user?.student?.id) {
-      fetchStudentGrades(user.student.id);
+      fetchStudentGrades(Number(user.student.id));
     }
   }, [isStudent, user?.student?.id]);
 
   const fetchCourseGrades = async (courseId) => {
+    const normalizedCourseId = Number(courseId);
+    if (!Number.isInteger(normalizedCourseId)) return;
     try {
       setLoading(true);
       const [course, courseGrades] = await Promise.all([
-        fetchCourse(courseId),
-        fetchGradesByCourse(courseId),
+        fetchCourse(normalizedCourseId),
+        fetchGradesByCourse(normalizedCourseId),
       ]);
       setCourseDetails(course);
       setCourseGrades(Array.isArray(courseGrades) ? courseGrades : []);

@@ -177,6 +177,10 @@ export async function updateProfile(userId, personId, personInput, userInput) {
 }
 
 export async function fetchNotifications(userId) {
+  const id = Number(userId);
+  if (!Number.isInteger(id)) {
+    throw new Error('userId invA!lido para notificaciones');
+  }
   const data = await graphqlRequest(
     `query Notifications($userId: Int!) {
       notificationsByUser(userId: $userId) {
@@ -188,26 +192,34 @@ export async function fetchNotifications(userId) {
         createdAt
       }
     }`,
-    { userId },
+    { userId: id },
   );
   return data.notificationsByUser;
 }
 
 export async function markNotificationRead(id) {
+  const notificationId = Number(id);
+  if (!Number.isInteger(notificationId)) {
+    throw new Error('id invA!lido para marcar notificaciA3n');
+  }
   await graphqlRequest(
     `mutation MarkNotification($id: Int!) {
       markNotificationAsRead(id: $id) { id }
     }`,
-    { id },
+    { id: notificationId },
   );
 }
 
 export async function markAllNotificationsRead(userId) {
+  const id = Number(userId);
+  if (!Number.isInteger(id)) {
+    throw new Error('userId invA!lido para marcar notificaciones');
+  }
   await graphqlRequest(
     `mutation MarkAllNotifications($userId: Int!) {
       markAllNotificationsAsRead(userId: $userId) { id }
     }`,
-    { userId },
+    { userId: id },
   );
 }
 
@@ -351,6 +363,7 @@ export async function createPayment(input) {
 }
 
 export async function fetchCourse(courseId) {
+  const id = Number(courseId);
   const data = await graphqlRequest(
     `query Course($id: Int!) {
       course(id: $id) {
@@ -374,12 +387,13 @@ export async function fetchCourse(courseId) {
         }
       }
     }`,
-    { id: courseId },
+    { id },
   );
   return data.course;
 }
 
 export async function fetchGradesByCourse(courseId) {
+  const id = Number(courseId);
   const data = await graphqlRequest(
     `query GradesByCourse($courseId: Int!) {
       gradesByCourse(courseId: $courseId) {
@@ -393,12 +407,13 @@ export async function fetchGradesByCourse(courseId) {
         }
       }
     }`,
-    { courseId },
+    { courseId: id },
   );
   return data.gradesByCourse;
 }
 
 export async function fetchGradesByStudent(studentId) {
+  const id = Number(studentId);
   const data = await graphqlRequest(
     `query GradesByStudent($studentId: Int!) {
       gradesByStudent(studentId: $studentId) {
@@ -409,7 +424,7 @@ export async function fetchGradesByStudent(studentId) {
         course { id name subject { name } }
       }
     }`,
-    { studentId },
+    { studentId: id },
   );
   return data.gradesByStudent;
 }
