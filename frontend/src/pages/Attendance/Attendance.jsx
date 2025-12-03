@@ -35,8 +35,12 @@ export default function Attendance() {
 
   useEffect(() => {
     if (isTeacher && Array.isArray(user?.courses)) {
-      setCourseOptions(user.courses);
-      setSelectedCourse(user.courses[0]?.id ?? null);
+      const normalizedCourses = user.courses.map((course) => ({
+        ...course,
+        id: Number(course.id),
+      }));
+      setCourseOptions(normalizedCourses);
+      setSelectedCourse(normalizedCourses[0]?.id ?? null);
     }
   }, [isTeacher, user]);
 
@@ -48,16 +52,18 @@ export default function Attendance() {
 
   useEffect(() => {
     if (isStudent && studentId) {
-      fetchStudentAttendance(studentId);
+      fetchStudentAttendance(Number(studentId));
     }
   }, [isStudent, studentId]);
 
   const fetchCourseData = async (courseId) => {
+    const id = Number(courseId);
+    if (!Number.isInteger(id)) return;
     try {
       setLoading(true);
       const [courseResponse, attendanceResponse] = await Promise.all([
-        fetchCourse(courseId),
-        fetchAttendanceByCourse(courseId, selectedDate),
+        fetchCourse(id),
+        fetchAttendanceByCourse(id, selectedDate),
       ]);
 
       setCourseAttendance({
@@ -104,9 +110,9 @@ export default function Attendance() {
     try {
       const requests = Object.entries(attendanceDraft).map(([studentId, status]) =>
         recordAttendanceMutation({
-          courseId: selectedCourse,
+          courseId: Number(selectedCourse),
           studentId: Number(studentId),
-          teacherId: user.teacher.id,
+          teacherId: Number(user.teacher.id),
           status,
           date: selectedDate,
         })

@@ -452,6 +452,10 @@ export async function createGrade(input) {
 }
 
 export async function fetchAttendanceByCourse(courseId, date) {
+  const id = Number(courseId);
+  if (!Number.isInteger(id)) {
+    throw new Error('courseId invA!lido para asistencia por curso');
+  }
   const data = await graphqlRequest(
     `query AttendanceByCourse($courseId: Int!, $date: String) {
       attendanceByCourse(courseId: $courseId, date: $date) {
@@ -470,12 +474,16 @@ export async function fetchAttendanceByCourse(courseId, date) {
         }
       }
     }`,
-    { courseId, date: date || null },
+    { courseId: id, date: date || null },
   );
   return data.attendanceByCourse;
 }
 
 export async function fetchAttendanceByStudent(studentId) {
+  const id = Number(studentId);
+  if (!Number.isInteger(id)) {
+    throw new Error('studentId invA!lido para asistencia de estudiante');
+  }
   const data = await graphqlRequest(
     `query AttendanceByStudent($studentId: Int!) {
       attendanceByStudent(studentId: $studentId) {
@@ -494,17 +502,29 @@ export async function fetchAttendanceByStudent(studentId) {
         }
       }
     }`,
-    { studentId },
+    { studentId: id },
   );
   return data.attendanceByStudent;
 }
 
 export async function recordAttendance(input) {
+  const normalized = {
+    ...input,
+    courseId: Number(input.courseId),
+    studentId: Number(input.studentId),
+    teacherId: input.teacherId !== undefined ? Number(input.teacherId) : undefined,
+  };
+  if (!Number.isInteger(normalized.courseId) || !Number.isInteger(normalized.studentId)) {
+    throw new Error('courseId o studentId invA!lido para registrar asistencia');
+  }
+  if (normalized.teacherId !== undefined && !Number.isInteger(normalized.teacherId)) {
+    throw new Error('teacherId invA!lido para registrar asistencia');
+  }
   const data = await graphqlRequest(
     `mutation RecordAttendance($input: RecordAttendanceInput!) {
       recordAttendance(input: $input) { id }
     }`,
-    { input },
+    { input: normalized },
   );
   return data.recordAttendance;
 }
