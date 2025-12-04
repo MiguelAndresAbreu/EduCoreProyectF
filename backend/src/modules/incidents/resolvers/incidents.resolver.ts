@@ -30,7 +30,7 @@ export class IncidentsResolver {
   ): Promise<IncidentModel> {
     const payload = { ...input };
     if (user.role === UserRole.STUDENT || user.role === UserRole.TEACHER) {
-      payload.reporterId = user.sub;
+      payload.reporterId = Number(user.sub);
     }
     const incident = await this.incidentsService.create(payload);
     return IncidentModel.fromEntity(incident);

@@ -43,10 +43,10 @@ export default function Incidents() {
         const data = await fetchIncidentsForAdmin(statusFilter || undefined);
         setIncidents(Array.isArray(data) ? data : []);
       } else if (isTeacher && user?.teacher?.id) {
-        const data = await fetchIncidentsByTeacher(user.teacher.id);
+        const data = await fetchIncidentsByTeacher(Number(user.teacher.id));
         setIncidents(Array.isArray(data) ? data : []);
       } else if (isStudent && user?.student?.id) {
-        const data = await fetchIncidentsByStudent(user.student.id);
+        const data = await fetchIncidentsByStudent(Number(user.student.id));
         setIncidents(Array.isArray(data) ? data : []);
       }
       setError("");
@@ -72,6 +72,7 @@ export default function Incidents() {
         description: formData.description,
         date: formData.date,
         status: "OPEN",
+        reporterId: user?.id ? Number(user.id) : undefined,
       });
       setFormData({ reportedId: "", description: "", date: new Date().toISOString().slice(0, 10) });
       await fetchIncidents();

@@ -276,6 +276,10 @@ export async function fetchIncidentsForAdmin(status) {
 }
 
 export async function fetchIncidentsByTeacher(teacherId) {
+  const id = Number(teacherId);
+  if (!Number.isInteger(id)) {
+    throw new Error('teacherId invalido para incidencias por docente');
+  }
   const data = await graphqlRequest(
     `query IncidentsByTeacher($teacherId: Int!) {
       incidentsByTeacher(teacherId: $teacherId) {
@@ -287,12 +291,16 @@ export async function fetchIncidentsByTeacher(teacherId) {
         reported { id person { firstName lastName } }
       }
     }`,
-    { teacherId },
+    { teacherId: id },
   );
   return data.incidentsByTeacher;
 }
 
 export async function fetchIncidentsByStudent(studentId) {
+  const id = Number(studentId);
+  if (!Number.isInteger(id)) {
+    throw new Error('studentId invalido para incidencias por estudiante');
+  }
   const data = await graphqlRequest(
     `query IncidentsByStudent($studentId: Int!) {
       incidentsByStudent(studentId: $studentId) {
@@ -304,17 +312,28 @@ export async function fetchIncidentsByStudent(studentId) {
         reported { id person { firstName lastName } }
       }
     }`,
-    { studentId },
+    { studentId: id },
   );
   return data.incidentsByStudent;
 }
 
 export async function createIncident(input) {
+  const normalized = {
+    ...input,
+    reporterId: input.reporterId !== undefined ? Number(input.reporterId) : undefined,
+    reportedId: Number(input.reportedId),
+  };
+  if (!Number.isInteger(normalized.reportedId)) {
+    throw new Error('reportedId invalido para crear incidencia');
+  }
+  if (normalized.reporterId !== undefined && !Number.isInteger(normalized.reporterId)) {
+    throw new Error('reporterId invalido para crear incidencia');
+  }
   const data = await graphqlRequest(
     `mutation CreateIncident($input: CreateIncidentInput!) {
       createIncident(input: $input) { id }
     }`,
-    { input },
+    { input: normalized },
   );
   return data.createIncident;
 }
