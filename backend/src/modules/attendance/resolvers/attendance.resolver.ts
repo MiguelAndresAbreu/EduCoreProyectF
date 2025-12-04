@@ -29,8 +29,13 @@ export class AttendanceResolver {
       @Args('input') input: RecordAttendanceInput,
       @CurrentUser() user: JwtPayload,
   ): Promise<AttendanceModel> {
-    if (user.role === UserRole.TEACHER && user.sub !== input.teacherId) {
-      throw new ForbiddenException('Solo puedes registrar asistencia para tus cursos');
+    if (user.role === UserRole.TEACHER) {
+      const teacher = await this.teachersService.findByUserId(user.sub);
+      if (!teacher) {
+        throw new ForbiddenException('Solo puedes registrar asistencia para tus cursos');
+      }
+      // Forzar que el docente autenticado sea el que registra la asistencia
+      input.teacherId = teacher.id;
     }
     const record = await this.attendanceService.registerAttendance(input);
     const model = AttendanceModel.fromEntity(record);
