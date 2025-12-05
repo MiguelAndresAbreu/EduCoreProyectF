@@ -24,6 +24,7 @@ export default function Attendance() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState(null);
   const [courseAttendance, setCourseAttendance] = useState({ records: [], summary: null });
+  const [studentAggregates, setStudentAggregates] = useState([]);
   const [studentAttendance, setStudentAttendance] = useState({ records: [], summary: null });
   const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -56,20 +57,46 @@ export default function Attendance() {
     }
   }, [isStudent, studentId]);
 
+  const buildStudentAggregates = (records) => {
+    const grouped = records.reduce((acc, record) => {
+      const studentId = record.student?.id;
+      const statusKey = (record.status ?? "").toLowerCase();
+      if (!studentId) return acc;
+      if (!statusKey) return acc;
+      if (!acc[studentId]) {
+        acc[studentId] = {
+          studentId,
+          name: `${record.student.person?.firstName ?? ""} ${record.student.person?.lastName ?? ""}`.trim(),
+          present: 0,
+          absent: 0,
+          late: 0,
+          total: 0,
+        };
+      }
+      acc[studentId][statusKey] = (acc[studentId][statusKey] ?? 0) + 1;
+      acc[studentId].total += 1;
+      return acc;
+    }, {});
+
+    return Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
+  };
+
   const fetchCourseData = async (courseId) => {
     const id = Number(courseId);
     if (!Number.isInteger(id)) return;
     try {
       setLoading(true);
-      const [courseResponse, attendanceResponse] = await Promise.all([
+      const [courseResponse, attendanceResponse, historyResponse] = await Promise.all([
         fetchCourse(id),
         fetchAttendanceByCourse(id, selectedDate),
+        fetchAttendanceByCourse(id, null),
       ]);
 
       setCourseAttendance({
         records: attendanceResponse?.records ?? [],
         summary: attendanceResponse?.summary ?? null,
       });
+      setStudentAggregates(buildStudentAggregates(historyResponse?.records ?? []));
       setCourseDetails(courseResponse);
       const initialDraft = {};
       courseResponse?.enrollments?.forEach((enrollment) => {
@@ -269,6 +296,81 @@ export default function Attendance() {
           )}
         </div>
       </div>
+
+      {isTeacher && (
+        <div className="attendance-history">
+          <section className="attendance-table-container saved-records">
+            <div className="table-header">
+              <div>
+                <h2>Asistencia guardada</h2>
+                <p>Registros confirmados para la fecha seleccionada.</p>
+              </div>
+              {loading && <span className="loading">Cargando...</span>}
+            </div>
+            <table className="attendance-table compact">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Docente</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseAttendance.records.map((record) => (
+                  <tr key={record.id}>
+                    <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
+                    <td>{format(new Date(record.date), "dd/MM/yyyy")}</td>
+                    <td>{STATUS_LABELS[record.status] ?? record.status}</td>
+                    <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
+                  </tr>
+                ))}
+                {!loading && courseAttendance.records.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty">Sin asistencia registrada para esta fecha.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <section className="attendance-table-container aggregate-records">
+            <div className="table-header">
+              <div>
+                <h2>Resumen por estudiante</h2>
+                <p>Totales de asistencias, tardanzas e inasistencias acumulados.</p>
+              </div>
+            </div>
+            <table className="attendance-table compact">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Asistencias</th>
+                  <th>Tardanzas</th>
+                  <th>Inasistencias</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {studentAggregates.map((item) => (
+                  <tr key={item.studentId}>
+                    <td>{item.name || `ID ${item.studentId}`}</td>
+                    <td>{item.present ?? 0}</td>
+                    <td>{item.late ?? 0}</td>
+                    <td>{item.absent ?? 0}</td>
+                    <td>{item.total ?? 0}</td>
+                  </tr>
+                ))}
+                {!loading && studentAggregates.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="empty">Aún no hay registros para calcular el resumen.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
