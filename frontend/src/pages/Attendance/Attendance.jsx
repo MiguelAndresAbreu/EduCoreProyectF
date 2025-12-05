@@ -28,6 +28,7 @@ export default function Attendance() {
   const [studentAttendance, setStudentAttendance] = useState({ records: [], summary: null });
   const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [savedDateFilter, setSavedDateFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +50,7 @@ export default function Attendance() {
     if (isTeacher && selectedCourse) {
       fetchCourseData(selectedCourse);
     }
-  }, [isTeacher, selectedCourse, selectedDate]);
+  }, [isTeacher, selectedCourse, selectedDate, savedDateFilter]);
 
   useEffect(() => {
     if (isStudent && studentId) {
@@ -89,7 +90,7 @@ export default function Attendance() {
       const [courseResponse, attendanceResponse, historyResponse] = await Promise.all([
         fetchCourse(id),
         fetchAttendanceByCourse(id, selectedDate),
-        fetchAttendanceByCourse(id, null),
+        fetchAttendanceByCourse(id, savedDateFilter || null),
       ]);
 
       setCourseAttendance({
@@ -193,6 +194,15 @@ export default function Attendance() {
               type="date"
               value={selectedDate}
               onChange={(event) => setSelectedDate(event.target.value)}
+            />
+          </div>
+          <div className="control-group">
+            <label htmlFor="saved-date">Fecha registros guardados</label>
+            <input
+              id="saved-date"
+              type="date"
+              value={savedDateFilter}
+              onChange={(event) => setSavedDateFilter(event.target.value)}
             />
           </div>
         </section>
