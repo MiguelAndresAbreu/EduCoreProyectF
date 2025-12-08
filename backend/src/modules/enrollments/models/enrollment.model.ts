@@ -33,7 +33,8 @@ export class EnrollmentModel {
 
     const student = StudentModel.fromEntity(entity.student);
     if (!student) {
-      throw new Error('Enrollment entity is missing student relation');
+      // Skip enrollments that do not have the student relation loaded to avoid runtime errors.
+      return null;
     }
     model.student = student;
 

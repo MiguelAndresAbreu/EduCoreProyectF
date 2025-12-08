@@ -37,6 +37,8 @@ export class StudentsService {
         'user',
         'person',
         'enrollments',
+        'enrollments.student',
+        'enrollments.student.person',
         'enrollments.course',
         'enrollments.course.subject',
         'enrollments.course.teacher',
