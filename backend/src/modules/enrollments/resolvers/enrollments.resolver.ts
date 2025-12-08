@@ -25,7 +25,11 @@ export class EnrollmentsResolver {
     @Args('input') input: CreateEnrollmentInput,
   ): Promise<EnrollmentModel> {
     const enrollment = await this.enrollmentsService.create(input);
-    return EnrollmentModel.fromEntity(enrollment, { includeCourse: true });
+    const model = EnrollmentModel.fromEntity(enrollment, { includeCourse: true });
+    if (!model) {
+      throw new Error('Enrollment creation returned incomplete data');
+    }
+    return model;
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,9 +47,9 @@ export class EnrollmentsResolver {
     }
 
     const enrollments = await this.enrollmentsService.findByStudentId(studentId);
-    return enrollments.map((enrollment) =>
-      EnrollmentModel.fromEntity(enrollment, { includeCourse: true }),
-    );
+    return enrollments
+      .map((enrollment) => EnrollmentModel.fromEntity(enrollment, { includeCourse: true }))
+      .filter((item): item is EnrollmentModel => item !== null);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
