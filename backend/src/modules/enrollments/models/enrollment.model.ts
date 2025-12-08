@@ -21,9 +21,9 @@ export class EnrollmentModel {
   status: string;
 
   static fromEntity(
-      entity: Enrollment | null | undefined,
-      options?: { includeCourse?: boolean },
-  ): EnrollmentModel {
+    entity: Enrollment | null | undefined,
+    options?: { includeCourse?: boolean },
+  ): EnrollmentModel | null {
     if (!entity) {
       throw new Error('Enrollment entity not found');
     }
