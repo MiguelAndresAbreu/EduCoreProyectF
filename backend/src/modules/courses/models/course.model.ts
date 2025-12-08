@@ -54,9 +54,9 @@ export class CourseModel {
     model.room = entity.room ?? null;
 
     if (options?.includeEnrollments) {
-      model.enrollments = (entity.enrollments ?? []).map((enrollment) =>
-          EnrollmentModel.fromEntity(enrollment, { includeCourse: false }),
-      );
+      model.enrollments = (entity.enrollments ?? [])
+        .map((enrollment) => EnrollmentModel.fromEntity(enrollment, { includeCourse: false }))
+        .filter((item): item is EnrollmentModel => item !== null);
     } else {
       model.enrollments = null;
     }
