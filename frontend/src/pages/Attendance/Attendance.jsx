@@ -24,6 +24,7 @@ export default function Attendance() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState(null);
   const [courseAttendance, setCourseAttendance] = useState({ records: [], summary: null });
+  const [savedAttendance, setSavedAttendance] = useState({ records: [], summary: null });
   const [studentAggregates, setStudentAggregates] = useState([]);
   const [studentAttendance, setStudentAttendance] = useState({ records: [], summary: null });
   const [attendanceDraft, setAttendanceDraft] = useState({});
@@ -87,15 +88,20 @@ export default function Attendance() {
     if (!Number.isInteger(id)) return;
     try {
       setLoading(true);
-      const [courseResponse, attendanceResponse, historyResponse] = await Promise.all([
+      const [courseResponse, attendanceResponse, savedResponse, historyResponse] = await Promise.all([
         fetchCourse(id),
         fetchAttendanceByCourse(id, selectedDate),
         fetchAttendanceByCourse(id, savedDateFilter || null),
+        fetchAttendanceByCourse(id, null),
       ]);
 
       setCourseAttendance({
         records: attendanceResponse?.records ?? [],
         summary: attendanceResponse?.summary ?? null,
+      });
+      setSavedAttendance({
+        records: savedResponse?.records ?? [],
+        summary: savedResponse?.summary ?? null,
       });
       setStudentAggregates(buildStudentAggregates(historyResponse?.records ?? []));
       setCourseDetails(courseResponse);
@@ -327,7 +333,7 @@ export default function Attendance() {
                 </tr>
               </thead>
               <tbody>
-                {courseAttendance.records.map((record) => (
+                {savedAttendance.records.map((record) => (
                   <tr key={record.id}>
                     <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
                     <td>{format(new Date(record.date), "dd/MM/yyyy")}</td>
@@ -335,7 +341,7 @@ export default function Attendance() {
                     <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
                   </tr>
                 ))}
-                {!loading && courseAttendance.records.length === 0 && (
+                {!loading && savedAttendance.records.length === 0 && (
                   <tr>
                     <td colSpan={4} className="empty">Sin asistencia registrada para esta fecha.</td>
                   </tr>
