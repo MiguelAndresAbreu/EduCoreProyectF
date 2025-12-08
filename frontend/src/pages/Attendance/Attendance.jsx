@@ -6,7 +6,7 @@ import {
   fetchAttendanceByStudent,
   recordAttendance as recordAttendanceMutation,
 } from "../../api/graphqlOperations";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import "./Attendance.css";
 
 const STATUS_LABELS = {
@@ -167,6 +167,11 @@ export default function Attendance() {
 
   const summaryCards = isTeacher ? courseAttendance.summary : studentAttendance.summary;
   const recordsToShow = isTeacher ? courseAttendance.records : studentAttendance.records;
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const parsed = parse(dateStr, "yyyy-MM-dd", new Date());
+    return format(parsed, "dd/MM/yyyy");
+  };
 
   return (
     <div className="attendance-page">
@@ -236,7 +241,7 @@ export default function Attendance() {
                   return (
                     <tr key={student.id}>
                       <td>{`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}</td>
-                      <td>{format(new Date(selectedDate), "dd/MM/yyyy")}</td>
+                      <td>{formatDisplayDate(selectedDate)}</td>
                       <td>{STATUS_LABELS[currentStatus]}</td>
                       <td className="actions">
                         {Object.keys(STATUS_LABELS).map((statusKey) => (
@@ -259,7 +264,7 @@ export default function Attendance() {
                 recordsToShow.map((record) => (
                   <tr key={record.id}>
                     <td>{record.course?.name ?? "Curso"}</td>
-                    <td>{format(new Date(record.date), "dd/MM/yyyy")}</td>
+                    <td>{formatDisplayDate(record.date)}</td>
                     <td>{STATUS_LABELS[record.status] ?? record.status}</td>
                   </tr>
                 ))}
@@ -336,7 +341,7 @@ export default function Attendance() {
                 {savedAttendance.records.map((record) => (
                   <tr key={record.id}>
                     <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
-                    <td>{format(new Date(record.date), "dd/MM/yyyy")}</td>
+                    <td>{formatDisplayDate(record.date)}</td>
                     <td>{STATUS_LABELS[record.status] ?? record.status}</td>
                     <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
                   </tr>
