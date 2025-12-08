@@ -594,7 +594,7 @@ export async function fetchReports(params) {
   const [attendance, grades, payments] = await Promise.all([
     graphqlRequest(
       `query AttendanceReport($courseId: Int, $studentId: Int, $teacherId: Int, $startDate: String, $endDate: String) {
-        attendanceReport(courseId: $courseId, studentId: $studentId, startDate: $startDate, endDate: $endDate) {
+        attendanceReport(courseId: $courseId, studentId: $studentId, teacherId: $teacherId, startDate: $startDate, endDate: $endDate) {
           records { id }
           summary { total present absent late attendanceRate }
         }
