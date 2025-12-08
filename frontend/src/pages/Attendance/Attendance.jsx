@@ -29,7 +29,7 @@ export default function Attendance() {
   const [studentAttendance, setStudentAttendance] = useState({ records: [], summary: null });
   const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [savedDateFilter, setSavedDateFilter] = useState("");
+  const [savedDateFilter, setSavedDateFilter] = useState(format(new Date(), "yyyy-MM-dd"));
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
