@@ -251,6 +251,23 @@ export async function createFinanceRecord(input) {
   return data.createFinanceRecord;
 }
 
+export async function fetchCourses() {
+  const data = await graphqlRequest(
+    `query Courses {
+      courses {
+        id
+        name
+        schedule
+        capacity
+        room
+        subject { id name code }
+        teacher { id person { firstName lastName } }
+      }
+    }`,
+  );
+  return data.courses;
+}
+
 export async function fetchIncidentsForAdmin(status) {
   const data = await graphqlRequest(
     `query Incidents($status: IncidentStatus) {
@@ -412,6 +429,144 @@ export async function fetchCourse(courseId) {
     { id },
   );
   return data.course;
+}
+
+export async function createCourse(input) {
+  const normalized = {
+    ...input,
+    subjectId: Number(input.subjectId),
+    teacherId: Number(input.teacherId),
+    capacity: input.capacity !== undefined ? Number(input.capacity) : undefined,
+  };
+  const data = await graphqlRequest(
+    `mutation CreateCourse($input: CreateCourseInput!) {
+      createCourse(input: $input) {
+        id
+        name
+        schedule
+        capacity
+        room
+        subject { id name code }
+        teacher { id person { firstName lastName } }
+        enrollments {
+          id
+          status
+          student { id person { firstName lastName } }
+        }
+      }
+    }`,
+    { input: normalized },
+  );
+  return data.createCourse;
+}
+
+export async function updateCourse(id, input) {
+  const courseId = Number(id);
+  const normalized = {
+    ...input,
+    subjectId: input.subjectId !== undefined ? Number(input.subjectId) : undefined,
+    teacherId: input.teacherId !== undefined ? Number(input.teacherId) : undefined,
+    capacity: input.capacity !== undefined ? Number(input.capacity) : undefined,
+  };
+  const data = await graphqlRequest(
+    `mutation UpdateCourse($id: Int!, $input: UpdateCourseInput!) {
+      updateCourse(id: $id, input: $input) {
+        id
+        name
+        schedule
+        capacity
+        room
+        subject { id name code }
+        teacher { id person { firstName lastName } }
+        enrollments {
+          id
+          status
+          student { id person { firstName lastName } }
+        }
+      }
+    }`,
+    { id: courseId, input: normalized },
+  );
+  return data.updateCourse;
+}
+
+export async function removeCourse(id) {
+  const courseId = Number(id);
+  await graphqlRequest(
+    `mutation RemoveCourse($id: Int!) {
+      removeCourse(id: $id)
+    }`,
+    { id: courseId },
+  );
+}
+
+export async function fetchSubjects() {
+  const data = await graphqlRequest(
+    `query Subjects {
+      subjects {
+        id
+        name
+        code
+        description
+      }
+    }`,
+  );
+  return data.subjects;
+}
+
+export async function fetchTeachers() {
+  const data = await graphqlRequest(
+    `query Teachers {
+      teachers {
+        id
+        person { firstName lastName email }
+      }
+    }`,
+  );
+  return data.teachers;
+}
+
+export async function fetchStudents() {
+  const data = await graphqlRequest(
+    `query Students {
+      students {
+        id
+        status
+        gradeLevel
+        person { firstName lastName email }
+      }
+    }`,
+  );
+  return data.students;
+}
+
+export async function enrollStudent(courseId, studentId) {
+  const data = await graphqlRequest(
+    `mutation EnrollStudent($input: CreateEnrollmentInput!) {
+      createEnrollment(input: $input) {
+        id
+        status
+        student { id person { firstName lastName } }
+      }
+    }`,
+    {
+      input: {
+        courseId: Number(courseId),
+        studentId: Number(studentId),
+      },
+    },
+  );
+  return data.createEnrollment;
+}
+
+export async function removeEnrollment(enrollmentId) {
+  const id = Number(enrollmentId);
+  await graphqlRequest(
+    `mutation RemoveEnrollment($id: Int!) {
+      removeEnrollment(id: $id)
+    }`,
+    { id },
+  );
 }
 
 export async function fetchGradesByCourse(courseId) {

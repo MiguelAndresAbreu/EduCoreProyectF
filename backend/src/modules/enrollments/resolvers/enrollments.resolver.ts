@@ -53,7 +53,7 @@ export class EnrollmentsResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
   @Mutation(() => Boolean)
   async removeEnrollment(
     @Args('id', { type: () => Int }) id: number,

@@ -23,7 +23,7 @@ export class CoursesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
   @Query(() => CourseModel)
   async course(
     @Args('id', { type: () => Int }) id: number,
@@ -33,7 +33,7 @@ export class CoursesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
   @Mutation(() => CourseModel)
   async createCourse(
     @Args('input') input: CreateCourseInput,
@@ -44,7 +44,7 @@ export class CoursesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
   @Mutation(() => CourseModel)
   async updateCourse(
     @Args('id', { type: () => Int }) id: number,

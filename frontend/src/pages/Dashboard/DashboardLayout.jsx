@@ -114,6 +114,9 @@ export default function DashboardLayout() {
     case "/reports":
       pageTitle = "Reportes";
       break;
+    case "/courses":
+      pageTitle = "Cursos";
+      break;
     case "/incidents":
       pageTitle = "Incidencias";
       break;
@@ -166,6 +169,14 @@ export default function DashboardLayout() {
                 <span>Asistencia</span>
               </Link>
             </li>
+            {(profile?.role === "ADMIN" || profile?.role === "STAFF") && (
+              <li>
+                <Link to="/courses">
+                  <BookOpen size={18} />
+                  <span>Cursos</span>
+                </Link>
+              </li>
+            )}
             <li>
               <Link to="/reports">
                 <BarChart2 size={18} />
