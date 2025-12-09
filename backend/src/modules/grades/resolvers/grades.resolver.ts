@@ -1,7 +1,13 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { GradesService } from '../grades.service';
-import { GradeModel, GradeReportModel } from '../models/grade.model';
+import {
+  GradeModel,
+  GradeReportModel,
+  StudentGradesReportModel,
+  CourseGradesReportModel,
+  ExportPayloadModel,
+} from '../models/grade.model';
 import { CreateGradeInput, UpdateGradeInput } from '../inputs/grade.input';
 import { UserRole } from '../../users/entities/user.entity';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
@@ -124,5 +130,62 @@ export class GradesResolver {
         average: item.average,
       })),
     };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Query(() => StudentGradesReportModel)
+  async studentGradesReport(
+    @Args('courseId', { type: () => Int }) courseId: number,
+    @Args('studentId', { type: () => Int }) studentId: number,
+  ): Promise<StudentGradesReportModel> {
+    const report = await this.gradesService.studentReportByCourse(courseId, studentId);
+    return {
+      student: report.student,
+      course: report.course,
+      subject: report.subject ?? null,
+      grades: report.grades
+        .map((grade) => GradeModel.fromEntity(grade))
+        .filter((g): g is GradeModel => g !== null),
+      subjectAverages: report.subjectAverages,
+      typeAverages: report.typeAverages,
+      overallAverage: report.overallAverage,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Query(() => CourseGradesReportModel)
+  async courseGradesReport(
+    @Args('courseId', { type: () => Int }) courseId: number,
+  ): Promise<CourseGradesReportModel> {
+    const report = await this.gradesService.courseReport(courseId);
+    return {
+      course: report.course,
+      students: report.students,
+      overallAverage: report.overallAverage,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Query(() => ExportPayloadModel)
+  async exportStudentGradesPdf(
+    @Args('courseId', { type: () => Int }) courseId: number,
+    @Args('studentId', { type: () => Int }) studentId: number,
+  ): Promise<ExportPayloadModel> {
+    // Stub: In a real scenario we would generate the PDF and return a signed URL.
+    const url = `/reports/grades/student-${studentId}-course-${courseId}.pdf`;
+    return { url, expiresAt: null };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Query(() => ExportPayloadModel)
+  async exportCourseGradesPdf(
+    @Args('courseId', { type: () => Int }) courseId: number,
+  ): Promise<ExportPayloadModel> {
+    const url = `/reports/grades/course-${courseId}.pdf`;
+    return { url, expiresAt: null };
   }
 }

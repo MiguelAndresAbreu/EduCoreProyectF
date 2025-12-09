@@ -6,6 +6,9 @@ import { CreateGradeInput, UpdateGradeInput } from './inputs/grade.input';
 import { CoursesService } from '../courses/courses.service';
 import { StudentsService } from '../students/students.service';
 import { TeachersService } from '../teachers/teachers.service';
+import { StudentModel } from '../students/models/student.model';
+import { CourseModel } from '../courses/models/course.model';
+import { SubjectAverageModel, GradeTypeAverageModel, CourseStudentSummaryModel, StudentGradesReportModel, CourseGradesReportModel } from './models/grade.model';
 
 @Injectable()
 export class GradesService {
@@ -150,5 +153,116 @@ export class GradesService {
     }
     const total = grades.reduce((sum, grade) => sum + Number(grade.value), 0);
     return Number((total / grades.length).toFixed(2));
+  }
+
+  private computeSubjectAverages(grades: Grade[]): SubjectAverageModel[] {
+    const acc = new Map<number, { total: number; count: number; name: string }>();
+    grades.forEach((grade) => {
+      const subject = grade.course?.subject;
+      if (!subject) return;
+      const current = acc.get(subject.id) ?? { total: 0, count: 0, name: subject.name };
+      current.total += Number(grade.value);
+      current.count += 1;
+      acc.set(subject.id, current);
+    });
+    return Array.from(acc.entries()).map(([subjectId, { total, count, name }]) => ({
+      subjectId,
+      subjectName: name,
+      average: count ? Number((total / count).toFixed(2)) : 0,
+    }));
+  }
+
+  private computeTypeAverages(grades: Grade[]): GradeTypeAverageModel[] {
+    const acc = new Map<string, { total: number; count: number }>();
+    grades.forEach((grade) => {
+      const current = acc.get(grade.type) ?? { total: 0, count: 0 };
+      current.total += Number(grade.value);
+      current.count += 1;
+      acc.set(grade.type, current);
+    });
+    return Array.from(acc.entries()).map(([type, { total, count }]) => ({
+      type,
+      average: count ? Number((total / count).toFixed(2)) : 0,
+    }));
+  }
+
+  async studentReportByCourse(courseId: number, studentId: number): Promise<StudentGradesReportModel> {
+    const course = await this.coursesService.findOne(courseId);
+    const student = await this.studentsService.findOne(studentId);
+    const grades = await this.gradeRepository.find({
+      where: { course: { id: course.id }, student: { id: student.id } },
+      relations: ['course', 'course.subject', 'student', 'student.person', 'teacher'],
+      order: { date: 'DESC' },
+    });
+
+    const gradeModels = grades.map((g) => g);
+    const subjectAverages = this.computeSubjectAverages(gradeModels);
+    const typeAverages = this.computeTypeAverages(gradeModels);
+    const overallAverage = this.getAverageForStudent(gradeModels);
+
+    const studentModel = StudentModel.fromEntity(student);
+    const courseModel = CourseModel.fromEntity(course, { includeEnrollments: false });
+    if (!studentModel || !courseModel) {
+      throw new NotFoundException('No se pudo construir el reporte');
+    }
+
+    return {
+      student: studentModel,
+      course: courseModel,
+      subject: courseModel.subject,
+      grades: grades,
+      subjectAverages,
+      typeAverages,
+      overallAverage,
+    };
+  }
+
+  async courseReport(courseId: number): Promise<CourseGradesReportModel> {
+    const course = await this.coursesService.findOne(courseId);
+    const grades = await this.gradeRepository.find({
+      where: { course: { id: course.id } },
+      relations: ['course', 'course.subject', 'student', 'student.person', 'teacher'],
+      order: { date: 'DESC' },
+    });
+
+    const byStudent = new Map<number, Grade[]>();
+    grades.forEach((grade) => {
+      const key = grade.student.id;
+      const list = byStudent.get(key) ?? [];
+      list.push(grade);
+      byStudent.set(key, list);
+    });
+
+    const studentsSummaries: CourseStudentSummaryModel[] = [];
+    byStudent.forEach((studentGrades, studentId) => {
+      const student = studentGrades[0].student;
+      const studentModel = StudentModel.fromEntity(student);
+      if (!studentModel) return;
+      studentsSummaries.push({
+        student: studentModel,
+        overallAverage: this.getAverageForStudent(studentGrades),
+        subjectAverages: this.computeSubjectAverages(studentGrades),
+      });
+    });
+
+    const overallAverage = studentsSummaries.length
+      ? Number(
+          (
+            studentsSummaries.reduce((sum, s) => sum + (s.overallAverage ?? 0), 0) /
+            studentsSummaries.length
+          ).toFixed(2),
+        )
+      : 0;
+
+    const courseModel = CourseModel.fromEntity(course, { includeEnrollments: false });
+    if (!courseModel) {
+      throw new NotFoundException('No se pudo construir el reporte de curso');
+    }
+
+    return {
+      course: courseModel,
+      students: studentsSummaries,
+      overallAverage,
+    };
   }
 }

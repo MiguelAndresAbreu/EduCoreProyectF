@@ -3,6 +3,7 @@ import { Grade, GradeType } from '../entities/grade.entity';
 import { CourseModel } from '../../courses/models/course.model';
 import { StudentModel } from '../../students/models/student.model';
 import { TeacherModel } from '../../teachers/models/teacher.model';
+import { SubjectModel } from '../../subjects/models/subject.model';
 
 registerEnumType(GradeType, { name: 'GradeType' });
 
@@ -72,4 +73,82 @@ export class GradeReportModel {
 
   @Field(() => [GradeStudentAverageModel])
   averagesByStudent: GradeStudentAverageModel[];
+}
+
+@ObjectType()
+export class SubjectAverageModel {
+  @Field(() => ID)
+  subjectId: number;
+
+  @Field(() => String)
+  subjectName: string;
+
+  @Field(() => Float)
+  average: number;
+}
+
+@ObjectType()
+export class GradeTypeAverageModel {
+  @Field(() => String)
+  type: string;
+
+  @Field(() => Float)
+  average: number;
+}
+
+@ObjectType()
+export class StudentGradesReportModel {
+  @Field(() => StudentModel)
+  student: StudentModel;
+
+  @Field(() => CourseModel)
+  course: CourseModel;
+
+  @Field(() => SubjectModel, { nullable: true })
+  subject?: SubjectModel | null;
+
+  @Field(() => [GradeModel])
+  grades: GradeModel[];
+
+  @Field(() => [SubjectAverageModel])
+  subjectAverages: SubjectAverageModel[];
+
+  @Field(() => [GradeTypeAverageModel])
+  typeAverages: GradeTypeAverageModel[];
+
+  @Field(() => Float)
+  overallAverage: number;
+}
+
+@ObjectType()
+export class CourseStudentSummaryModel {
+  @Field(() => StudentModel)
+  student: StudentModel;
+
+  @Field(() => Float)
+  overallAverage: number;
+
+  @Field(() => [SubjectAverageModel])
+  subjectAverages: SubjectAverageModel[];
+}
+
+@ObjectType()
+export class CourseGradesReportModel {
+  @Field(() => CourseModel)
+  course: CourseModel;
+
+  @Field(() => [CourseStudentSummaryModel])
+  students: CourseStudentSummaryModel[];
+
+  @Field(() => Float)
+  overallAverage: number;
+}
+
+@ObjectType()
+export class ExportPayloadModel {
+  @Field(() => String)
+  url: string;
+
+  @Field(() => String, { nullable: true })
+  expiresAt?: string | null;
 }
