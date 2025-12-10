@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
   fetchCourse,
+  fetchCourses,
   fetchGradesByCourse,
   fetchGradesByStudent,
   createGrade as createGradeMutation,
@@ -19,6 +20,7 @@ const GRADE_TYPES = [
 
 export default function Grades() {
   const { user } = useOutletContext();
+  const isAdmin = user?.role === "ADMIN" || user?.role === "STAFF";
   const isTeacher = user?.role === "TEACHER";
   const isStudent = user?.role === "STUDENT";
 
@@ -49,10 +51,16 @@ export default function Grades() {
   }, [isTeacher, user]);
 
   useEffect(() => {
-    if (isTeacher && selectedCourseId) {
+    if (isAdmin) {
+      fetchAllCourses();
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if ((isTeacher || isAdmin) && selectedCourseId) {
       fetchCourseGrades(selectedCourseId);
     }
-  }, [isTeacher, selectedCourseId]);
+  }, [isTeacher, isAdmin, selectedCourseId]);
 
   useEffect(() => {
     if (isStudent && user?.student?.id) {
@@ -75,6 +83,22 @@ export default function Grades() {
     } catch (err) {
       setError("No se pudo cargar la información del curso.");
       setCourseGrades([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllCourses = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchCourses();
+      const normalized = Array.isArray(data) ? data.map((course) => ({ ...course, id: Number(course.id) })) : [];
+      setCourseOptions(normalized);
+      setSelectedCourseId((prev) => prev ?? normalized[0]?.id ?? null);
+      setError("");
+    } catch (err) {
+      setError("No se pudieron cargar los cursos.");
+      setCourseOptions([]);
     } finally {
       setLoading(false);
     }
@@ -122,7 +146,7 @@ export default function Grades() {
     }
   };
 
-  const gradesToDisplay = isTeacher ? courseGrades : studentGrades;
+  const gradesToDisplay = (isTeacher || isAdmin) ? courseGrades : studentGrades;
 
   const averageGrade = useMemo(() => {
     if (!gradesToDisplay.length) return 0;
@@ -144,7 +168,7 @@ export default function Grades() {
 
       {error && <div className="grades-error">{error}</div>}
 
-      {isTeacher && (
+      {(isTeacher || isAdmin) && (
         <section className="grades-controls">
           <div className="control-group">
             <label htmlFor="course">Curso</label>
@@ -163,16 +187,52 @@ export default function Grades() {
         </section>
       )}
 
-      <div className={`grades-grid ${isTeacher ? "teacher" : "student"}`}>
-        <div className="grades-table-container">
+      {isAdmin && (
+        <div className="grades-table-container course-list">
           <div className="table-header">
-            <h2>{isTeacher ? "Calificaciones del curso" : "Historial académico"}</h2>
+            <h2>Cursos</h2>
             {loading && <span className="loading">Cargando...</span>}
           </div>
           <table className="grades-table">
             <thead>
               <tr>
-                <th>{isTeacher ? "Estudiante" : "Curso"}</th>
+                <th>Curso</th>
+                <th>Materia</th>
+                <th>Docente</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courseOptions.map((course) => (
+                <tr
+                  key={course.id}
+                  className={course.id === selectedCourseId ? "selected" : ""}
+                  onClick={() => setSelectedCourseId(course.id)}
+                >
+                  <td>{course.name}</td>
+                  <td>{course.subject?.name ?? "-"}</td>
+                  <td>{`${course.teacher?.person?.firstName ?? ""} ${course.teacher?.person?.lastName ?? ""}`.trim() || "-"}</td>
+                </tr>
+              ))}
+              {!loading && courseOptions.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="empty">Sin cursos disponibles.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className={`grades-grid ${isTeacher ? "teacher" : isAdmin ? "admin" : "student"}`}>
+        <div className="grades-table-container">
+          <div className="table-header">
+            <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial académico"}</h2>
+            {loading && <span className="loading">Cargando...</span>}
+          </div>
+          <table className="grades-table">
+            <thead>
+              <tr>
+                <th>{(isTeacher || isAdmin) ? "Estudiante" : "Curso"}</th>
                 <th>Tipo</th>
                 <th>Nota</th>
                 <th>Fecha</th>
@@ -182,7 +242,7 @@ export default function Grades() {
               {gradesToDisplay.map((grade) => (
                 <tr key={grade.id}>
                   <td>
-                    {isTeacher
+                    {(isTeacher || isAdmin)
                       ? `${grade.student?.person?.firstName ?? ""} ${grade.student?.person?.lastName ?? ""}`.trim()
                       : grade.course?.name ?? "Materia"}
                   </td>
