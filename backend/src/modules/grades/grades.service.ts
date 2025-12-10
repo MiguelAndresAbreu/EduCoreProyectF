@@ -8,7 +8,13 @@ import { StudentsService } from '../students/students.service';
 import { TeachersService } from '../teachers/teachers.service';
 import { StudentModel } from '../students/models/student.model';
 import { CourseModel } from '../courses/models/course.model';
-import { SubjectAverageModel, GradeTypeAverageModel, CourseStudentSummaryModel, StudentGradesReportModel, CourseGradesReportModel } from './models/grade.model';
+import {
+  SubjectAverageModel,
+  GradeTypeAverageModel,
+  CourseStudentSummaryModel,
+  StudentGradesReportModel,
+  CourseGradesReportModel,
+} from './models/grade.model';
 
 @Injectable()
 export class GradesService {
@@ -74,20 +80,56 @@ export class GradesService {
     return this.gradeRepository.save(grade);
   }
 
-  async findByStudent(studentId: number) {
+  async findByStudent(
+    studentId: number,
+    filters?: { subjectId?: number; type?: string; startDate?: string; endDate?: string },
+  ) {
     const student = await this.studentsService.findOne(studentId);
+    const where: FindOptionsWhere<Grade> = { student: { id: student.id } as any };
+
+    if (filters?.subjectId) {
+      where.course = { ...(where.course as any), subject: { id: filters.subjectId } } as any;
+    }
+
+    if (filters?.type) {
+      where.type = filters.type as any;
+    }
+
+    if (filters?.startDate && filters?.endDate) {
+      where.date = Between(filters.startDate, filters.endDate);
+    } else if (filters?.startDate) {
+      where.date = Between(filters.startDate, filters.startDate);
+    }
+
     return this.gradeRepository.find({
-      where: { student: { id: student.id } },
-      relations: ['course', 'course.subject', 'teacher'],
+      where,
+      relations: ['course', 'course.subject', 'teacher', 'student', 'student.person'],
       order: { date: 'DESC' },
     });
   }
 
-  async findByCourse(courseId: number) {
+  async findByCourse(
+    courseId: number,
+    filters?: { subjectId?: number; type?: string; startDate?: string; endDate?: string },
+  ) {
     const course = await this.coursesService.findOne(courseId);
+    const where: FindOptionsWhere<Grade> = { course: { id: course.id } as any };
+
+    if (filters?.subjectId) {
+      where.course = { id: course.id, subject: { id: filters.subjectId } } as any;
+    }
+    if (filters?.type) {
+      where.type = filters.type as any;
+    }
+    if (filters?.startDate && filters?.endDate) {
+      where.date = Between(filters.startDate, filters.endDate);
+    } else if (filters?.startDate) {
+      where.date = Between(filters.startDate, filters.startDate);
+    }
+
     return this.gradeRepository.find({
-      where: { course: { id: course.id } },
-      relations: ['student', 'student.person', 'teacher'],
+      where,
+      relations: ['student', 'student.person', 'teacher', 'course', 'course.subject'],
       order: { date: 'DESC' },
     });
   }
@@ -97,6 +139,8 @@ export class GradesService {
     studentId?: number;
     startDate?: string;
     endDate?: string;
+    subjectId?: number;
+    type?: string;
   }) {
     const where: FindOptionsWhere<Grade> = {};
 
@@ -106,6 +150,14 @@ export class GradesService {
 
     if (options.studentId) {
       where.student = { id: options.studentId } as any;
+    }
+
+    if (options.subjectId) {
+      where.course = { ...(where.course as any), subject: { id: options.subjectId } } as any;
+    }
+
+    if (options.type) {
+      where.type = options.type as any;
     }
 
     if (options.startDate && options.endDate) {
@@ -186,11 +238,24 @@ export class GradesService {
     }));
   }
 
-  async studentReportByCourse(courseId: number, studentId: number): Promise<StudentGradesReportModel> {
+  async studentReportByCourse(
+    courseId: number,
+    studentId: number,
+    filters?: { subjectId?: number; type?: string; startDate?: string; endDate?: string },
+  ): Promise<StudentGradesReportModel> {
     const course = await this.coursesService.findOne(courseId);
     const student = await this.studentsService.findOne(studentId);
     const grades = await this.gradeRepository.find({
-      where: { course: { id: course.id }, student: { id: student.id } },
+      where: {
+        course: { id: course.id, ...(filters?.subjectId ? { subject: { id: filters.subjectId } } : {}) } as any,
+        student: { id: student.id } as any,
+        ...(filters?.type ? { type: filters.type as any } : {}),
+        ...(filters?.startDate && filters?.endDate
+          ? { date: Between(filters.startDate, filters.endDate) }
+          : filters?.startDate
+            ? { date: Between(filters.startDate, filters.startDate) }
+            : {}),
+      },
       relations: ['course', 'course.subject', 'student', 'student.person', 'teacher'],
       order: { date: 'DESC' },
     });
@@ -217,10 +282,21 @@ export class GradesService {
     };
   }
 
-  async courseReport(courseId: number): Promise<CourseGradesReportModel> {
+  async courseReport(
+    courseId: number,
+    filters?: { subjectId?: number; type?: string; startDate?: string; endDate?: string },
+  ): Promise<CourseGradesReportModel> {
     const course = await this.coursesService.findOne(courseId);
     const grades = await this.gradeRepository.find({
-      where: { course: { id: course.id } },
+      where: {
+        course: { id: course.id, ...(filters?.subjectId ? { subject: { id: filters.subjectId } } : {}) } as any,
+        ...(filters?.type ? { type: filters.type as any } : {}),
+        ...(filters?.startDate && filters?.endDate
+          ? { date: Between(filters.startDate, filters.endDate) }
+          : filters?.startDate
+            ? { date: Between(filters.startDate, filters.startDate) }
+            : {}),
+      },
       relations: ['course', 'course.subject', 'student', 'student.person', 'teacher'],
       order: { date: 'DESC' },
     });

@@ -52,6 +52,15 @@ export class EnrollmentsService {
     });
   }
 
+  async findStudentsByCourse(courseId: number) {
+    const course = await this.coursesService.findOne(courseId);
+    const enrollments = await this.enrollmentRepository.find({
+      where: { course: { id: course.id } },
+      relations: ['student', 'student.person'],
+    });
+    return enrollments.map((enrollment) => enrollment.student);
+  }
+
   async remove(id: number) {
     const enrollment = await this.enrollmentRepository.findOne({ where: { id } });
     if (!enrollment) {

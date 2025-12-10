@@ -66,10 +66,14 @@ export class GradesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
   @Query(() => [GradeModel])
   async gradesByCourse(
     @Args('courseId', { type: () => Int }) courseId: number,
+    @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
+    @Args('type', { type: () => String, nullable: true }) type?: string,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<GradeModel[]> {
     if (user.role === UserRole.TEACHER) {
@@ -79,17 +83,21 @@ export class GradesResolver {
         throw new ForbiddenException('No autorizado para ver este curso');
       }
     }
-    const grades = await this.gradesService.findByCourse(courseId);
+    const grades = await this.gradesService.findByCourse(courseId, { subjectId, type, startDate, endDate });
     return grades
       .map((grade) => GradeModel.fromEntity(grade))
       .filter((item): item is GradeModel => item !== null);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT)
+  @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER, UserRole.STUDENT)
   @Query(() => [GradeModel])
   async gradesByStudent(
     @Args('studentId', { type: () => Int }) studentId: number,
+    @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
+    @Args('type', { type: () => String, nullable: true }) type?: string,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<GradeModel[]> {
     if (user.role === UserRole.STUDENT) {
@@ -98,26 +106,31 @@ export class GradesResolver {
         throw new ForbiddenException('No autorizado para ver estas calificaciones');
       }
     }
-    const grades = await this.gradesService.findByStudent(studentId);
+    const grades = await this.gradesService.findByStudent(studentId, { subjectId, type, startDate, endDate } as any);
     return grades
       .map((grade) => GradeModel.fromEntity(grade))
       .filter((item): item is GradeModel => item !== null);
   }
 
+  // Reporte global: solo ADMIN
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.TEACHER)
+  @Roles(UserRole.ADMIN)
   @Query(() => GradeReportModel)
   async gradesReport(
     @Args('courseId', { type: () => Int, nullable: true }) courseId?: number,
     @Args('studentId', { type: () => Int, nullable: true }) studentId?: number,
     @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
     @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
+    @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
+    @Args('type', { type: () => String, nullable: true }) type?: string,
   ): Promise<GradeReportModel> {
     const report = await this.gradesService.report({
       courseId,
       studentId,
       startDate,
       endDate,
+      subjectId,
+      type,
     });
 
     return {
@@ -133,13 +146,22 @@ export class GradesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
   @Query(() => StudentGradesReportModel)
   async studentGradesReport(
     @Args('courseId', { type: () => Int }) courseId: number,
     @Args('studentId', { type: () => Int }) studentId: number,
+    @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
+    @Args('type', { type: () => String, nullable: true }) type?: string,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
   ): Promise<StudentGradesReportModel> {
-    const report = await this.gradesService.studentReportByCourse(courseId, studentId);
+    const report = await this.gradesService.studentReportByCourse(courseId, studentId, {
+      subjectId,
+      type,
+      startDate,
+      endDate,
+    });
     return {
       student: report.student,
       course: report.course,
@@ -154,12 +176,16 @@ export class GradesResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
   @Query(() => CourseGradesReportModel)
   async courseGradesReport(
     @Args('courseId', { type: () => Int }) courseId: number,
+    @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
+    @Args('type', { type: () => String, nullable: true }) type?: string,
+    @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
+    @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
   ): Promise<CourseGradesReportModel> {
-    const report = await this.gradesService.courseReport(courseId);
+    const report = await this.gradesService.courseReport(courseId, { subjectId, type, startDate, endDate });
     return {
       course: report.course,
       students: report.students,

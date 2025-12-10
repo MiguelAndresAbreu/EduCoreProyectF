@@ -6,6 +6,7 @@ import { CreateEnrollmentInput } from '../inputs/create-enrollment.input';
 import { UserRole } from '../../users/entities/user.entity';
 import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { StudentsService } from '../../students/students.service';
+import { StudentModel } from '../../students/models/student.model';
 import {JwtAuthGuard} from "@/common/guards/jwt-auth.guard";
 import {RolesGuard} from "@/common/guards/roles.guard";
 import {Roles} from "@/common/decorators/roles.decorator";
@@ -50,6 +51,18 @@ export class EnrollmentsResolver {
     return enrollments
       .map((enrollment) => EnrollmentModel.fromEntity(enrollment, { includeCourse: true }))
       .filter((item): item is EnrollmentModel => item !== null);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.STAFF)
+  @Query(() => [StudentModel])
+  async studentsByCourse(
+    @Args('courseId', { type: () => Int }) courseId: number,
+  ): Promise<StudentModel[]> {
+    const students = await this.enrollmentsService.findStudentsByCourse(courseId);
+    return students
+      .map((student) => StudentModel.fromEntity(student))
+      .filter((item): item is StudentModel => item !== null);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
