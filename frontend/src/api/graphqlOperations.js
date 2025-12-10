@@ -116,6 +116,26 @@ const PROFILE_FIELDS = `
   }
 `;
 
+const USER_SUMMARY_FIELDS = `
+  id
+  username
+  email
+  role
+  isActive
+  person {
+    id
+    firstName
+    lastName
+    email
+    phone
+    address
+    birthDate
+    avatar
+  }
+  createdAt
+  updatedAt
+`;
+
 export async function login(identifier, password) {
   const data = await graphqlRequest(
     `mutation Login($input: LoginInput!) {
@@ -174,6 +194,45 @@ export async function updateProfile(userId, personId, personInput, userInput) {
     },
   );
   return data.updateProfile;
+}
+
+export async function fetchUsersList() {
+  const data = await graphqlRequest(
+    `query Users {
+      users {
+        ${USER_SUMMARY_FIELDS}
+      }
+    }`,
+  );
+  return data.users;
+}
+
+export async function createUserWithProfile(input) {
+  const normalized = {
+    username: input.username,
+    email: input.email,
+    password: input.password,
+    role: input.role,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    phone: input.phone || null,
+    address: input.address || null,
+    birthDate: input.birthDate || null,
+    avatar: input.avatar || null,
+  };
+
+  const data = await graphqlRequest(
+    `mutation Register($input: RegisterInput!) {
+      register(input: $input) {
+        user {
+          ${USER_SUMMARY_FIELDS}
+        }
+      }
+    }`,
+    { input: normalized },
+  );
+
+  return data.register?.user;
 }
 
 export async function fetchNotifications(userId) {

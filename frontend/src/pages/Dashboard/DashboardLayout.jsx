@@ -13,6 +13,7 @@ import {
   BarChart2,
   AlertTriangle,
   Wallet,
+  Users as UsersIcon,
 } from "lucide-react";
 import {
   fetchProfile as fetchProfileQuery,
@@ -123,6 +124,9 @@ export default function DashboardLayout() {
     case "/finance":
       pageTitle = "Caja";
       break;
+    case "/users":
+      pageTitle = "Usuarios";
+      break;
     case "/profile":
       pageTitle = "Perfil";
       break;
@@ -174,6 +178,14 @@ export default function DashboardLayout() {
                 <Link to="/courses">
                   <BookOpen size={18} />
                   <span>Cursos</span>
+                </Link>
+              </li>
+            )}
+            {profile?.role === "ADMIN" && (
+              <li>
+                <Link to="/users">
+                  <UsersIcon size={18} />
+                  <span>Usuarios</span>
                 </Link>
               </li>
             )}
