@@ -93,7 +93,11 @@ export default function Users() {
     try {
       const created = await createUserWithProfile(payload);
       if (created) {
-        setUsers((prev) => [created, ...prev.filter((u) => u.id !== created.id)]);
+        const createdWithDate = {
+          ...created,
+          createdAt: created.createdAt ?? new Date().toISOString(),
+        };
+        setUsers((prev) => [createdWithDate, ...prev.filter((u) => u.id !== created.id)]);
         resetForm(form.role);
         setSuccess("Usuario creado correctamente");
       } else {

@@ -136,6 +136,24 @@ const USER_SUMMARY_FIELDS = `
   updatedAt
 `;
 
+const USER_PROFILE_FIELDS = `
+  id
+  username
+  email
+  role
+  isActive
+  person {
+    id
+    firstName
+    lastName
+    email
+    phone
+    address
+    birthDate
+    avatar
+  }
+`;
+
 export async function login(identifier, password) {
   const data = await graphqlRequest(
     `mutation Login($input: LoginInput!) {
@@ -225,7 +243,7 @@ export async function createUserWithProfile(input) {
     `mutation Register($input: RegisterInput!) {
       register(input: $input) {
         user {
-          ${USER_SUMMARY_FIELDS}
+          ${USER_PROFILE_FIELDS}
         }
       }
     }`,
