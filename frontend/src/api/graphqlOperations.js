@@ -812,22 +812,3 @@ export async function fetchAttendanceReport(params) {
 
   return data.attendanceReport;
 }
-
-export async function fetchCourses() {
-  const data = await graphqlRequest(
-    `query Courses {
-      courses {
-        id
-        name
-        schedule
-        room
-        subject { id name }
-        teacher {
-          id
-          person { firstName lastName }
-        }
-      }
-    }`,
-  );
-  return data.courses;
-}
