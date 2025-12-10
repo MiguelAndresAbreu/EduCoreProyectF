@@ -783,3 +783,32 @@ export async function fetchReports(params) {
     payments: payments.paymentsReport,
   };
 }
+
+export async function fetchAttendanceReport(params) {
+  const filters = {
+    courseId: params.courseId ? Number(params.courseId) : null,
+    studentId: params.studentId ? Number(params.studentId) : null,
+    teacherId: params.teacherId ? Number(params.teacherId) : null,
+    startDate: params.startDate || null,
+    endDate: params.endDate || null,
+  };
+
+  const data = await graphqlRequest(
+    `query AttendanceReport($courseId: Int, $studentId: Int, $teacherId: Int, $startDate: String, $endDate: String) {
+      attendanceReport(courseId: $courseId, studentId: $studentId, teacherId: $teacherId, startDate: $startDate, endDate: $endDate) {
+        records {
+          id
+          date
+          status
+          student { id person { firstName lastName } }
+          teacher { id person { firstName lastName } }
+          course { id name subject { name } }
+        }
+        summary { total present absent late attendanceRate }
+      }
+    }`,
+    filters,
+  );
+
+  return data.attendanceReport;
+}

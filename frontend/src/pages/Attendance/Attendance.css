@@ -69,6 +69,10 @@
   grid-template-columns: 1fr;
 }
 
+.attendance-grid.admin {
+  grid-template-columns: 1.2fr 2fr;
+}
+
 .attendance-table-container {
   overflow-x: auto;
   border-radius: 16px;
@@ -112,6 +116,10 @@
   padding: 12px 15px;
   border-bottom: 1px solid #dbeafe;
   font-size: 0.95rem;
+}
+
+.attendance-table tr.selected {
+  background: #eff6ff;
 }
 
 .attendance-table th {
@@ -234,6 +242,12 @@
   margin: 4px 0 0 0;
   color: #475569;
   font-size: 0.9rem;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
 }
 
 @media (max-width: 1024px) {

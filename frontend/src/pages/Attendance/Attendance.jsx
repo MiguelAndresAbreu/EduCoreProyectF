@@ -4,6 +4,7 @@ import {
   fetchCourse,
   fetchAttendanceByCourse,
   fetchAttendanceByStudent,
+  fetchAttendanceReport,
   recordAttendance as recordAttendanceMutation,
 } from "../../api/graphqlOperations";
 import { format, parse } from "date-fns";
@@ -17,6 +18,7 @@ const STATUS_LABELS = {
 
 export default function Attendance() {
   const { user } = useOutletContext();
+  const isAdmin = user?.role === "ADMIN" || user?.role === "STAFF";
   const isTeacher = user?.role === "TEACHER";
   const isStudent = user?.role === "STUDENT";
 
@@ -30,6 +32,9 @@ export default function Attendance() {
   const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [savedDateFilter, setSavedDateFilter] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [adminDate, setAdminDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [adminAttendance, setAdminAttendance] = useState({ records: [], summary: null });
+  const [selectedAdminCourse, setSelectedAdminCourse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -59,6 +64,12 @@ export default function Attendance() {
     }
   }, [isStudent, studentId]);
 
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminAttendance(adminDate);
+    }
+  }, [isAdmin, adminDate]);
+
   const buildStudentAggregates = (records) => {
     const grouped = records.reduce((acc, record) => {
       const studentId = record.student?.id;
@@ -77,6 +88,34 @@ export default function Attendance() {
       }
       acc[studentId][statusKey] = (acc[studentId][statusKey] ?? 0) + 1;
       acc[studentId].total += 1;
+      return acc;
+    }, {});
+
+    return Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const buildCourseAggregates = (records) => {
+    const grouped = records.reduce((acc, record) => {
+      const courseId = record.course?.id;
+      if (!courseId) return acc;
+      const statusKey = (record.status ?? "").toLowerCase();
+      if (!statusKey) return acc;
+      if (!acc[courseId]) {
+        acc[courseId] = {
+          courseId,
+          name: record.course?.name ?? `Curso ${courseId}`,
+          subject: record.course?.subject?.name ?? "",
+          teacher: record.teacher
+            ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim()
+            : "",
+          present: 0,
+          absent: 0,
+          late: 0,
+          total: 0,
+        };
+      }
+      acc[courseId][statusKey] = (acc[courseId][statusKey] ?? 0) + 1;
+      acc[courseId].total += 1;
       return acc;
     }, {});
 
@@ -113,6 +152,30 @@ export default function Attendance() {
       setError("");
     } catch (err) {
       setError("No se pudo cargar la información del curso.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAdminAttendance = async (date) => {
+    try {
+      setLoading(true);
+      const report = await fetchAttendanceReport({ startDate: date, endDate: date });
+      setAdminAttendance({
+        records: report?.records ?? [],
+        summary: report?.summary ?? null,
+      });
+      if (report?.records?.length) {
+        const firstCourse = report.records[0].course?.id ?? null;
+        const hasPrevious = report.records.some((record) => record.course?.id === selectedAdminCourse);
+        setSelectedAdminCourse(hasPrevious ? selectedAdminCourse : firstCourse);
+      } else {
+        setSelectedAdminCourse(null);
+      }
+      setError("");
+    } catch (err) {
+      setError("No se pudo cargar la asistencia para la fecha indicada.");
+      setAdminAttendance({ records: [], summary: null });
     } finally {
       setLoading(false);
     }
@@ -172,6 +235,117 @@ export default function Attendance() {
     const parsed = parse(dateStr, "yyyy-MM-dd", new Date());
     return format(parsed, "dd/MM/yyyy");
   };
+  const adminCourseAggregates = buildCourseAggregates(adminAttendance.records);
+  const selectedAdminRecords = adminAttendance.records.filter(
+    (record) => record.course?.id === selectedAdminCourse
+  );
+
+  if (isAdmin) {
+    const selectedCourseInfo = adminCourseAggregates.find((c) => c.courseId === selectedAdminCourse);
+    return (
+      <div className="attendance-page">
+        <header className="attendance-header">
+          <h1>Control de asistencia</h1>
+          <p>Consulta los cursos que registraron asistencia por fecha y revisa los detalles guardados.</p>
+        </header>
+
+        {error && <div className="attendance-error">{error}</div>}
+
+        <section className="attendance-controls admin-controls">
+          <div className="control-group">
+            <label htmlFor="admin-date">Fecha</label>
+            <input
+              id="admin-date"
+              type="date"
+              value={adminDate}
+              onChange={(event) => setAdminDate(event.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="attendance-submit"
+            onClick={() => fetchAdminAttendance(adminDate)}
+            disabled={loading}
+          >
+            {loading ? "Buscando..." : "Buscar registros"}
+          </button>
+        </section>
+
+        <div className="attendance-grid admin">
+          <div className="attendance-table-container">
+            <div className="table-header">
+              <h2>Cursos con asistencia</h2>
+              {loading && <span className="loading">Cargando...</span>}
+            </div>
+            <table className="attendance-table compact">
+              <thead>
+                <tr>
+                  <th>Curso</th>
+                  <th>Materia</th>
+                  <th>Docente</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminCourseAggregates.map((course) => (
+                  <tr
+                    key={course.courseId}
+                    className={course.courseId === selectedAdminCourse ? "selected" : ""}
+                    onClick={() => setSelectedAdminCourse(course.courseId)}
+                  >
+                    <td>{course.name}</td>
+                    <td>{course.subject || "-"}</td>
+                    <td>{course.teacher || "-"}</td>
+                    <td>{course.total ?? 0}</td>
+                  </tr>
+                ))}
+                {!loading && adminCourseAggregates.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty">Sin cursos con asistencia para esta fecha.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="attendance-table-container">
+            <div className="table-header">
+              <div>
+                <h2>Asistencia guardada</h2>
+                <p>{selectedCourseInfo ? `${selectedCourseInfo.name} · ${formatDisplayDate(adminDate)}` : "Selecciona un curso"}</p>
+              </div>
+              {loading && <span className="loading">Cargando...</span>}
+            </div>
+            <table className="attendance-table compact">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Estado</th>
+                  <th>Docente</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedAdminRecords.map((record) => (
+                  <tr key={record.id}>
+                    <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
+                    <td>{STATUS_LABELS[record.status] ?? record.status}</td>
+                    <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
+                    <td>{formatDisplayDate(record.date)}</td>
+                  </tr>
+                ))}
+                {!loading && selectedAdminRecords.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty">No hay registros para mostrar.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="attendance-page">
