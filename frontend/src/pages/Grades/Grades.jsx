@@ -225,52 +225,8 @@ export default function Grades() {
 
       <div className={`grades-grid ${isTeacher ? "teacher" : isAdmin ? "admin" : "student"}`}>
         <div className="grades-table-container">
-          <div className="table-header">
-            <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial académico"}</h2>
-            {loading && <span className="loading">Cargando...</span>}
-          </div>
-          <table className="grades-table">
-            <thead>
-              <tr>
-                <th>{(isTeacher || isAdmin) ? "Estudiante" : "Curso"}</th>
-                <th>Tipo</th>
-                <th>Nota</th>
-                <th>Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gradesToDisplay.map((grade) => (
-                <tr key={grade.id}>
-                  <td>
-                    {(isTeacher || isAdmin)
-                      ? `${grade.student?.person?.firstName ?? ""} ${grade.student?.person?.lastName ?? ""}`.trim()
-                      : grade.course?.name ?? "Materia"}
-                  </td>
-                  <td>{GRADE_TYPES.find((item) => item.value === grade.type)?.label ?? grade.type}</td>
-                  <td className="score">{Number(grade.value ?? grade.score).toFixed(2)}</td>
-                  <td>{grade.date ? format(new Date(grade.date), "dd/MM/yyyy") : "--"}</td>
-                </tr>
-              ))}
-
-              {!loading && gradesToDisplay.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="empty">
-                    {isTeacher ? "Aún no se registran calificaciones." : "Sin calificaciones disponibles."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="grades-summary">
-          <div className="summary-card highlight">
-            <h4>Promedio general</h4>
-            <p>{averageGrade}</p>
-          </div>
           {isTeacher && (
-            <form className="grade-form" onSubmit={handleCreateGrade}>
-              <h3>Registrar calificación</h3>
+            <form className="grade-form inline" onSubmit={handleCreateGrade}>
               <label>
                 Estudiante
                 <select value={formData.studentId} onChange={handleFormChange("studentId")} required>
@@ -315,6 +271,49 @@ export default function Grades() {
               </button>
             </form>
           )}
+          <div className="table-header">
+            <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial académico"}</h2>
+            {loading && <span className="loading">Cargando...</span>}
+          </div>
+          <table className="grades-table">
+            <thead>
+              <tr>
+                <th>{(isTeacher || isAdmin) ? "Estudiante" : "Curso"}</th>
+                <th>Tipo</th>
+                <th>Nota</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gradesToDisplay.map((grade) => (
+                <tr key={grade.id}>
+                  <td>
+                    {(isTeacher || isAdmin)
+                      ? `${grade.student?.person?.firstName ?? ""} ${grade.student?.person?.lastName ?? ""}`.trim()
+                      : grade.course?.name ?? "Materia"}
+                  </td>
+                  <td>{GRADE_TYPES.find((item) => item.value === grade.type)?.label ?? grade.type}</td>
+                  <td className="score">{Number(grade.value ?? grade.score).toFixed(2)}</td>
+                  <td>{grade.date ? format(new Date(grade.date), "dd/MM/yyyy") : "--"}</td>
+                </tr>
+              ))}
+
+              {!loading && gradesToDisplay.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="empty">
+                    {isTeacher ? "Aún no se registran calificaciones." : "Sin calificaciones disponibles."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grades-summary">
+          <div className="summary-card highlight">
+            <h4>Promedio general</h4>
+            <p>{averageGrade}</p>
+          </div>
         </div>
       </div>
     </div>
