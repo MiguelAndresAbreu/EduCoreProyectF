@@ -41,6 +41,12 @@ type AuthPayloadModel {
   user: UserProfileModel!
 }
 
+type CourseGradesReportModel {
+  course: CourseModel!
+  overallAverage: Float!
+  students: [CourseStudentSummaryModel!]!
+}
+
 type CourseModel {
   capacity: Int!
   enrollments: [EnrollmentModel!]
@@ -50,6 +56,12 @@ type CourseModel {
   schedule: String
   subject: SubjectModel!
   teacher: TeacherModel!
+}
+
+type CourseStudentSummaryModel {
+  overallAverage: Float!
+  student: StudentModel!
+  subjectAverages: [SubjectAverageModel!]!
 }
 
 input CreateCourseInput {
@@ -147,6 +159,11 @@ type EnrollmentModel {
   student: StudentModel!
 }
 
+type ExportPayloadModel {
+  expiresAt: String
+  url: String!
+}
+
 type FinanceDashboardModel {
   daily: FinanceTotalsModel!
   monthly: FinanceTotalsModel!
@@ -207,6 +224,11 @@ enum GradeType {
   PARTICIPATION
   PROJECT
   QUIZ
+}
+
+type GradeTypeAverageModel {
+  average: Float!
+  type: String!
 }
 
 type GradesReportModel {
@@ -344,11 +366,14 @@ type Query {
   attendanceByStudent(endDate: String, startDate: String, studentId: Int!): AttendanceResultModel!
   attendanceReport(courseId: Int, endDate: String, startDate: String, studentId: Int, teacherId: Int): AttendanceReportModel!
   course(id: Int!): CourseModel!
+  courseGradesReport(courseId: Int!, endDate: String, startDate: String, subjectId: Int, type: String): CourseGradesReportModel!
   courses: [CourseModel!]!
   enrollmentsByStudent(studentId: Int!): [EnrollmentModel!]!
+  exportCourseGradesPdf(courseId: Int!): ExportPayloadModel!
+  exportStudentGradesPdf(courseId: Int!, studentId: Int!): ExportPayloadModel!
   financeOverview: FinanceOverviewModel!
-  gradesByCourse(courseId: Int!): [GradeModel!]!
-  gradesByStudent(studentId: Int!): [GradeModel!]!
+  gradesByCourse(courseId: Int!, endDate: String, startDate: String, subjectId: Int, type: String): [GradeModel!]!
+  gradesByStudent(endDate: String, startDate: String, studentId: Int!, subjectId: Int, type: String): [GradeModel!]!
   gradesReport(courseId: Int, endDate: String, startDate: String, studentId: Int): GradesReportModel!
   incidents(status: IncidentStatus): [IncidentModel!]!
   incidentsByStudent(studentId: Int!): [IncidentModel!]!
@@ -360,8 +385,10 @@ type Query {
   person(id: Int!): PersonModel
   roles: [UserRole!]!
   student(id: Int!): StudentModel!
+  studentGradesReport(courseId: Int!, endDate: String, startDate: String, studentId: Int!, subjectId: Int, type: String): StudentGradesReportModel!
   studentPerformance(studentId: Int!): PerformanceReportModel!
   students: [StudentModel!]!
+  studentsByCourse(courseId: Int!): [StudentModel!]!
   subject(id: Int!): SubjectModel!
   subjects: [SubjectModel!]!
   teacher(id: Int!): TeacherModel!
@@ -396,6 +423,16 @@ type StudentAverageModel {
   studentId: ID!
 }
 
+type StudentGradesReportModel {
+  course: CourseModel!
+  grades: [GradeModel!]!
+  overallAverage: Float!
+  student: StudentModel!
+  subject: SubjectModel
+  subjectAverages: [SubjectAverageModel!]!
+  typeAverages: [GradeTypeAverageModel!]!
+}
+
 type StudentModel {
   enrollmentDate: DateTime!
   gradeLevel: String
@@ -407,6 +444,12 @@ type StudentModel {
 type StudentPaymentsModel {
   accountStatus: PaymentsTotalsModel!
   payments: [PaymentModel!]!
+}
+
+type SubjectAverageModel {
+  average: Float!
+  subjectId: ID!
+  subjectName: String!
 }
 
 type SubjectModel {

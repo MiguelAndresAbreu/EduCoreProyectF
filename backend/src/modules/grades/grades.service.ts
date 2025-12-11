@@ -311,10 +311,12 @@ export class GradesService {
 
     const studentsSummaries: CourseStudentSummaryModel[] = [];
     byStudent.forEach((studentGrades, studentId) => {
-      if (!studentGrades.length) {
-        return;
-      }
-      const student = studentGrades[0].student;
+      const first = studentGrades[0];
+if (!first) {
+  throw new Error("No se encontraron calificaciones para este estudiante.");
+}
+
+const student = first.student;
       const studentModel = StudentModel.fromEntity(student);
       if (!studentModel) return;
       studentsSummaries.push({
