@@ -34,7 +34,6 @@ export default function Incidents() {
   });
   const [usersOptions, setUsersOptions] = useState([]);
   const [reportedQuery, setReportedQuery] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     fetchIncidents();
@@ -86,12 +85,11 @@ export default function Incidents() {
       return fullName.toLowerCase() === value.toLowerCase();
     });
     setFormData((prev) => ({ ...prev, reportedId: match?.id ? String(match.id) : "" }));
-    setShowSuggestions(true);
   };
 
   const filteredUsers = usersOptions.filter((userOption) => {
     const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
-    return reportedQuery.length >= 1 && fullName.includes(reportedQuery.toLowerCase());
+    return reportedQuery.length === 0 || fullName.includes(reportedQuery.toLowerCase());
   });
 
   const handleCreateIncident = async (event) => {
@@ -149,36 +147,24 @@ export default function Incidents() {
             <div className="form-row">
               <label>
                 Usuario reportado
-                <div className="autocomplete">
-                  <input
-                    type="text"
-                    value={reportedQuery}
-                    onChange={(e) => handleReportedQueryChange(e.target.value)}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-                    placeholder="Escribe un nombre"
-                    required
-                  />
-                  {showSuggestions && filteredUsers.length > 0 && (
-                    <ul className="suggestions">
-                      {filteredUsers.slice(0, 8).map((option) => {
-                        const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
-                        return (
-                          <li
-                            key={option.id}
-                            onMouseDown={() => {
-                              setReportedQuery(fullName);
-                              setFormData((prev) => ({ ...prev, reportedId: String(option.id) }));
-                              setShowSuggestions(false);
-                            }}
-                          >
-                            {fullName}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
+                <input
+                  type="text"
+                  value={reportedQuery}
+                  onChange={(e) => handleReportedQueryChange(e.target.value)}
+                  placeholder="Buscar por nombre"
+                  list="reported-users"
+                  required
+                />
+                <datalist id="reported-users">
+                  {filteredUsers.map((option) => {
+                    const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
+                    return (
+                      <option key={option.id} value={fullName}>
+                        {fullName}
+                      </option>
+                    );
+                  })}
+                </datalist>
               </label>
               <label>
                 Fecha
