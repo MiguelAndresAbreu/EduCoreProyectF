@@ -311,6 +311,9 @@ export class GradesService {
 
     const studentsSummaries: CourseStudentSummaryModel[] = [];
     byStudent.forEach((studentGrades, studentId) => {
+      if (!studentGrades.length) {
+        return;
+      }
       const student = studentGrades[0].student;
       const studentModel = StudentModel.fromEntity(student);
       if (!studentModel) return;
