@@ -12,7 +12,7 @@ import "./Incidents.css";
 
 const STATUSES = [
   { value: "OPEN", label: "Abierto" },
-  { value: "REVIEW", label: "En revisión" },
+  { value: "REVIEW", label: "En revision" },
   { value: "CLOSED", label: "Cerrado" },
 ];
 
@@ -96,11 +96,18 @@ export default function Incidents() {
 
   const handleCreateIncident = async (event) => {
     event.preventDefault();
-    if (!formData.reportedId || !formData.description) return;
+    let targetId = formData.reportedId;
+    if (!targetId && filteredUsers.length === 1) {
+      targetId = String(filteredUsers[0].id);
+    }
+    if (!targetId || !formData.description) {
+      setError("Selecciona un usuario valido para reportar.");
+      return;
+    }
     setSaving(true);
     try {
       await createIncidentMutation({
-        reportedId: Number(formData.reportedId),
+        reportedId: Number(targetId),
         description: formData.description,
         date: formData.date,
         status: "OPEN",
@@ -129,73 +136,74 @@ export default function Incidents() {
   return (
     <div className="incidents-page">
       <header className="incidents-header">
-        <h1>Gestión de incidencias</h1>
+        <h1>Gestion de incidencias</h1>
         <p>Reporta y da seguimiento a incidentes entre estudiantes y docentes.</p>
       </header>
 
       {error && <div className="incidents-error">{error}</div>}
 
+      {(isStudent || isTeacher) && (
+        <div className="incidents-form inline">
+          <h3>Reportar nueva incidencia</h3>
+          <form onSubmit={handleCreateIncident}>
+            <div className="form-row">
+              <label>
+                Usuario reportado
+                <div className="autocomplete">
+                  <input
+                    type="text"
+                    value={reportedQuery}
+                    onChange={(e) => handleReportedQueryChange(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+                    placeholder="Escribe un nombre"
+                    required
+                  />
+                  {showSuggestions && filteredUsers.length > 0 && (
+                    <ul className="suggestions">
+                      {filteredUsers.slice(0, 8).map((option) => {
+                        const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
+                        return (
+                          <li
+                            key={option.id}
+                            onMouseDown={() => {
+                              setReportedQuery(fullName);
+                              setFormData((prev) => ({ ...prev, reportedId: String(option.id) }));
+                              setShowSuggestions(false);
+                            }}
+                          >
+                            {fullName}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </label>
+              <label>
+                Fecha
+                <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
+              </label>
+              <label className="grow">
+                Descripcion
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={handleFormChange("description")}
+                  placeholder="Describe la situacion presentada"
+                  required
+                />
+              </label>
+              <button type="submit" disabled={saving}>
+                {saving ? "Enviando..." : "Enviar reporte"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="incidents-grid">
         <section className="incidents-list">
-          {(isStudent || isTeacher) && (
-            <div className="incidents-form inline">
-              <h3>Reportar nueva incidencia</h3>
-              <form onSubmit={handleCreateIncident}>
-                <div className="form-row">
-                  <label>
-                    Usuario reportado
-                    <div className="autocomplete">
-                      <input
-                        type="text"
-                        value={reportedQuery}
-                        onChange={(e) => handleReportedQueryChange(e.target.value)}
-                        onFocus={() => setShowSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-                        placeholder="Escribe un nombre"
-                        required
-                      />
-                      {showSuggestions && filteredUsers.length > 0 && (
-                        <ul className="suggestions">
-                          {filteredUsers.slice(0, 8).map((option) => {
-                            const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
-                            return (
-                              <li
-                                key={option.id}
-                                onMouseDown={() => {
-                                  setReportedQuery(fullName);
-                                  setFormData((prev) => ({ ...prev, reportedId: String(option.id) }));
-                                  setShowSuggestions(false);
-                                }}
-                              >
-                                {fullName}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                    </div>
-                  </label>
-                  <label>
-                    Fecha
-                    <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
-                  </label>
-                  <label className="grow">
-                    Descripcion
-                    <input
-                      type="text"
-                      value={formData.description}
-                      onChange={handleFormChange("description")}
-                      placeholder="Describe la situacion presentada"
-                      required
-                    />
-                  </label>
-                  <button type="submit" disabled={saving}>
-                    {saving ? "Enviando..." : "Enviar reporte"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
           <div className="list-header">
             <h2>Incidencias registradas</h2>
             {isAdmin && (
