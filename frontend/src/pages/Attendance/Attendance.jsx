@@ -35,6 +35,7 @@ export default function Attendance() {
   const [adminDate, setAdminDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [adminAttendance, setAdminAttendance] = useState({ records: [], summary: null });
   const [selectedAdminCourse, setSelectedAdminCourse] = useState(null);
+  const [activeTab, setActiveTab] = useState("register");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -72,13 +73,12 @@ export default function Attendance() {
 
   const buildStudentAggregates = (records) => {
     const grouped = records.reduce((acc, record) => {
-      const studentId = record.student?.id;
+      const sId = record.student?.id;
       const statusKey = (record.status ?? "").toLowerCase();
-      if (!studentId) return acc;
-      if (!statusKey) return acc;
-      if (!acc[studentId]) {
-        acc[studentId] = {
-          studentId,
+      if (!sId || !statusKey) return acc;
+      if (!acc[sId]) {
+        acc[sId] = {
+          studentId: sId,
           name: `${record.student.person?.firstName ?? ""} ${record.student.person?.lastName ?? ""}`.trim(),
           present: 0,
           absent: 0,
@@ -86,20 +86,18 @@ export default function Attendance() {
           total: 0,
         };
       }
-      acc[studentId][statusKey] = (acc[studentId][statusKey] ?? 0) + 1;
-      acc[studentId].total += 1;
+      acc[sId][statusKey] = (acc[sId][statusKey] ?? 0) + 1;
+      acc[sId].total += 1;
       return acc;
     }, {});
-
     return Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
   };
 
   const buildCourseAggregates = (records) => {
     const grouped = records.reduce((acc, record) => {
       const courseId = record.course?.id;
-      if (!courseId) return acc;
       const statusKey = (record.status ?? "").toLowerCase();
-      if (!statusKey) return acc;
+      if (!courseId || !statusKey) return acc;
       if (!acc[courseId]) {
         acc[courseId] = {
           courseId,
@@ -118,7 +116,6 @@ export default function Attendance() {
       acc[courseId].total += 1;
       return acc;
     }, {});
-
     return Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
   };
 
@@ -151,7 +148,7 @@ export default function Attendance() {
       setAttendanceDraft(initialDraft);
       setError("");
     } catch (err) {
-      setError("No se pudo cargar la información del curso.");
+      setError("No se pudo cargar la informacion del curso.");
     } finally {
       setLoading(false);
     }
@@ -217,7 +214,7 @@ export default function Attendance() {
       await Promise.all(requests);
       await fetchCourseData(selectedCourse);
     } catch (err) {
-      setError("No se pudo registrar la asistencia. Verifica que no esté duplicada.");
+      setError("No se pudo registrar la asistencia. Verifica que no este duplicada.");
     } finally {
       setSaving(false);
     }
@@ -312,7 +309,7 @@ export default function Attendance() {
             <div className="table-header">
               <div>
                 <h2>Asistencia guardada</h2>
-                <p>{selectedCourseInfo ? `${selectedCourseInfo.name} · ${formatDisplayDate(adminDate)}` : "Selecciona un curso"}</p>
+                <p>{selectedCourseInfo ? `${selectedCourseInfo.name} - ${formatDisplayDate(adminDate)}` : "Selecciona un curso"}</p>
               </div>
               {loading && <span className="loading">Cargando...</span>}
             </div>
@@ -351,7 +348,7 @@ export default function Attendance() {
     <div className="attendance-page">
       <header className="attendance-header">
         <h1>Control de asistencia</h1>
-        <p>Registra y consulta la asistencia por curso con métricas automáticas.</p>
+        <p>Registra y consulta la asistencia por curso con metricas automaticas.</p>
       </header>
 
       {error && <div className="attendance-error">{error}</div>}
@@ -367,203 +364,287 @@ export default function Attendance() {
             >
               {courseOptions.map((course) => (
                 <option key={course.id} value={course.id}>
-                  {course.name} • {course.subject?.name ?? "Materia"}
+                  {course.name} - {course.subject?.name ?? "Materia"}
                 </option>
               ))}
             </select>
           </div>
-          <div className="control-group">
-            <label htmlFor="date">Fecha</label>
-            <input
-              id="date"
-              type="date"
-              value={selectedDate}
-              onChange={(event) => setSelectedDate(event.target.value)}
-            />
-          </div>
-          <div className="control-group">
-            <label htmlFor="saved-date">Fecha registros guardados</label>
-            <input
-              id="saved-date"
-              type="date"
-              value={savedDateFilter}
-              onChange={(event) => setSavedDateFilter(event.target.value)}
-            />
-          </div>
         </section>
       )}
 
-      <div className={`attendance-grid ${isTeacher ? "teacher" : "student"}`}>
-        <div className="attendance-table-container">
-          <div className="table-header">
-            <h2>{isTeacher ? "Registro de asistencia" : "Historial"}</h2>
-            {loading && <span className="loading">Cargando...</span>}
-          </div>
-          <table className="attendance-table">
-            <thead>
-              <tr>
-                <th>{isTeacher ? "Estudiante" : "Curso"}</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                {isTeacher && <th>Acciones</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {isTeacher && currentStudents.length > 0 && (
-                currentStudents.map((student) => {
-                  const currentStatus = attendanceDraft[student.id] ?? "PRESENT";
-                  return (
-                    <tr key={student.id}>
-                      <td>{`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}</td>
-                      <td>{formatDisplayDate(selectedDate)}</td>
-                      <td>{STATUS_LABELS[currentStatus]}</td>
-                      <td className="actions">
-                        {Object.keys(STATUS_LABELS).map((statusKey) => (
-                          <button
-                            key={statusKey}
-                            className={currentStatus === statusKey ? "active" : ""}
-                            onClick={() => handleMarkStatus(student.id, statusKey)}
-                            type="button"
-                          >
-                            {STATUS_LABELS[statusKey]}
-                          </button>
-                        ))}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-
-              {!isTeacher && recordsToShow.length > 0 &&
-                recordsToShow.map((record) => (
-                  <tr key={record.id}>
-                    <td>{record.course?.name ?? "Curso"}</td>
-                    <td>{formatDisplayDate(record.date)}</td>
-                    <td>{STATUS_LABELS[record.status] ?? record.status}</td>
-                  </tr>
-                ))}
-
-              {!loading && ((isTeacher && currentStudents.length === 0) || (!isTeacher && recordsToShow.length === 0)) && (
-                <tr>
-                  <td colSpan={isTeacher ? 4 : 3} className="empty">
-                    {isTeacher ? "No hay estudiantes inscritos en este curso." : "Sin registros disponibles."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="attendance-summary">
-          <h3>Resumen</h3>
-          <div className="summary-grid">
-            <div className="summary-card">
-              <h4>Total</h4>
-              <p>{summaryCards?.total ?? 0}</p>
-            </div>
-            <div className="summary-card">
-              <h4>Asistencias</h4>
-              <p>{summaryCards?.present ?? 0}</p>
-            </div>
-            <div className="summary-card">
-              <h4>Inasistencias</h4>
-              <p>{summaryCards?.absent ?? 0}</p>
-            </div>
-            <div className="summary-card">
-              <h4>Tardanzas</h4>
-              <p>{summaryCards?.late ?? 0}</p>
-            </div>
-            <div className="summary-card highlight">
-              <h4>Porcentaje</h4>
-              <p>{summaryCards?.attendanceRate ?? 0}%</p>
-            </div>
-          </div>
-
-          {isTeacher && (
+      {isTeacher ? (
+        <div className="attendance-tabs">
+          <div className="tab-list">
             <button
+              className={activeTab === "register" ? "active" : ""}
+              onClick={() => setActiveTab("register")}
               type="button"
-              className="attendance-submit"
-              onClick={handleRegisterAttendance}
-              disabled={saving || currentStudents.length === 0}
             >
-              {saving ? "Guardando..." : "Registrar asistencia"}
+              Registro
             </button>
+            <button
+              className={activeTab === "saved" ? "active" : ""}
+              onClick={() => setActiveTab("saved")}
+              type="button"
+            >
+              Asistencia guardada
+            </button>
+            <button
+              className={activeTab === "summary" ? "active" : ""}
+              onClick={() => setActiveTab("summary")}
+              type="button"
+            >
+              Resumen
+            </button>
+          </div>
+
+          {activeTab === "register" && (
+            <div className="tab-panel register-panel">
+              <div className="panel-header">
+                <div>
+                  <h2>Registro de asistencia</h2>
+                  <p>Marca el estado de cada estudiante.</p>
+                </div>
+                <div className="control-inline">
+                  <label htmlFor="date">Fecha</label>
+                  <input
+                    id="date"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(event) => setSelectedDate(event.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="attendance-table-container">
+                <table className="attendance-table">
+                  <thead>
+                    <tr>
+                      <th>Estudiante</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentStudents.length > 0 &&
+                      currentStudents.map((student) => {
+                        const currentStatus = attendanceDraft[student.id] ?? "PRESENT";
+                        return (
+                          <tr key={student.id}>
+                            <td>{`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}</td>
+                            <td>{formatDisplayDate(selectedDate)}</td>
+                            <td>{STATUS_LABELS[currentStatus]}</td>
+                            <td className="actions">
+                              {Object.keys(STATUS_LABELS).map((statusKey) => (
+                                <button
+                                  key={statusKey}
+                                  className={currentStatus === statusKey ? "active" : ""}
+                                  onClick={() => handleMarkStatus(student.id, statusKey)}
+                                  type="button"
+                                >
+                                  {STATUS_LABELS[statusKey]}
+                                </button>
+                              ))}
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                    {!loading && currentStudents.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="empty">
+                          No hay estudiantes inscritos en este curso.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="register-footer">
+                <div className="summary-grid compact">
+                  <div className="summary-card">
+                    <h4>Total</h4>
+                    <p>{summaryCards?.total ?? 0}</p>
+                  </div>
+                  <div className="summary-card">
+                    <h4>Asistencias</h4>
+                    <p>{summaryCards?.present ?? 0}</p>
+                  </div>
+                  <div className="summary-card">
+                    <h4>Inasistencias</h4>
+                    <p>{summaryCards?.absent ?? 0}</p>
+                  </div>
+                  <div className="summary-card">
+                    <h4>Tardanzas</h4>
+                    <p>{summaryCards?.late ?? 0}</p>
+                  </div>
+                  <div className="summary-card highlight">
+                    <h4>Porcentaje</h4>
+                    <p>{summaryCards?.attendanceRate ?? 0}%</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="attendance-submit"
+                  onClick={handleRegisterAttendance}
+                  disabled={saving || currentStudents.length === 0}
+                >
+                  {saving ? "Guardando..." : "Registrar asistencia"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "saved" && (
+            <div className="tab-panel">
+              <div className="panel-header">
+                <div>
+                  <h2>Asistencia guardada</h2>
+                  <p>Registros confirmados para la fecha seleccionada.</p>
+                </div>
+                <div className="control-inline">
+                  <label htmlFor="saved-date">Fecha registros guardados</label>
+                  <input
+                    id="saved-date"
+                    type="date"
+                    value={savedDateFilter}
+                    onChange={(event) => setSavedDateFilter(event.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="attendance-table-container">
+                <table className="attendance-table compact">
+                  <thead>
+                    <tr>
+                      <th>Estudiante</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      <th>Docente</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {savedAttendance.records.map((record) => (
+                      <tr key={record.id}>
+                        <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
+                        <td>{formatDisplayDate(record.date)}</td>
+                        <td>{STATUS_LABELS[record.status] ?? record.status}</td>
+                        <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
+                      </tr>
+                    ))}
+                    {!loading && savedAttendance.records.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="empty">Sin asistencia registrada para esta fecha.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "summary" && (
+            <div className="tab-panel">
+              <div className="panel-header">
+                <div>
+                  <h2>Resumen por estudiante</h2>
+                  <p>Totales de asistencias, tardanzas e inasistencias acumulados.</p>
+                </div>
+              </div>
+              <div className="attendance-table-container">
+                <table className="attendance-table compact">
+                  <thead>
+                    <tr>
+                      <th>Estudiante</th>
+                      <th>Asistencias</th>
+                      <th>Tardanzas</th>
+                      <th>Inasistencias</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studentAggregates.map((item) => (
+                      <tr key={item.studentId}>
+                        <td>{item.name || `ID ${item.studentId}`}</td>
+                        <td>{item.present ?? 0}</td>
+                        <td>{item.late ?? 0}</td>
+                        <td>{item.absent ?? 0}</td>
+                        <td>{item.total ?? 0}</td>
+                      </tr>
+                    ))}
+                    {!loading && studentAggregates.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="empty">Aun no hay registros para calcular el resumen.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </div>
-      </div>
-
-      {isTeacher && (
-        <div className="attendance-history">
-          <section className="attendance-table-container saved-records">
+      ) : (
+        <div className={`attendance-grid ${isTeacher ? "teacher" : "student"}`}>
+          <div className="attendance-table-container">
             <div className="table-header">
-              <div>
-                <h2>Asistencia guardada</h2>
-                <p>Registros confirmados para la fecha seleccionada.</p>
-              </div>
+              <h2>Historial</h2>
               {loading && <span className="loading">Cargando...</span>}
             </div>
-            <table className="attendance-table compact">
+            <table className="attendance-table">
               <thead>
                 <tr>
-                  <th>Estudiante</th>
+                  <th>Curso</th>
                   <th>Fecha</th>
                   <th>Estado</th>
-                  <th>Docente</th>
                 </tr>
               </thead>
               <tbody>
-                {savedAttendance.records.map((record) => (
-                  <tr key={record.id}>
-                    <td>{`${record.student?.person?.firstName ?? ""} ${record.student?.person?.lastName ?? ""}`.trim()}</td>
-                    <td>{formatDisplayDate(record.date)}</td>
-                    <td>{STATUS_LABELS[record.status] ?? record.status}</td>
-                    <td>{record.teacher ? `${record.teacher.person?.firstName ?? ""} ${record.teacher.person?.lastName ?? ""}`.trim() : "-"}</td>
-                  </tr>
-                ))}
-                {!loading && savedAttendance.records.length === 0 && (
+                {recordsToShow.length > 0 &&
+                  recordsToShow.map((record) => (
+                    <tr key={record.id}>
+                      <td>{record.course?.name ?? "Curso"}</td>
+                      <td>{formatDisplayDate(record.date)}</td>
+                      <td>{STATUS_LABELS[record.status] ?? record.status}</td>
+                    </tr>
+                  ))}
+
+                {!loading && recordsToShow.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="empty">Sin asistencia registrada para esta fecha.</td>
+                    <td colSpan={3} className="empty">
+                      Sin registros disponibles.
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </section>
+          </div>
 
-          <section className="attendance-table-container aggregate-records">
-            <div className="table-header">
-              <div>
-                <h2>Resumen por estudiante</h2>
-                <p>Totales de asistencias, tardanzas e inasistencias acumulados.</p>
+          <div className="attendance-summary">
+            <h3>Resumen</h3>
+            <div className="summary-grid">
+              <div className="summary-card">
+                <h4>Total</h4>
+                <p>{summaryCards?.total ?? 0}</p>
+              </div>
+              <div className="summary-card">
+                <h4>Asistencias</h4>
+                <p>{summaryCards?.present ?? 0}</p>
+              </div>
+              <div className="summary-card">
+                <h4>Inasistencias</h4>
+                <p>{summaryCards?.absent ?? 0}</p>
+              </div>
+              <div className="summary-card">
+                <h4>Tardanzas</h4>
+                <p>{summaryCards?.late ?? 0}</p>
+              </div>
+              <div className="summary-card highlight">
+                <h4>Porcentaje</h4>
+                <p>{summaryCards?.attendanceRate ?? 0}%</p>
               </div>
             </div>
-            <table className="attendance-table compact">
-              <thead>
-                <tr>
-                  <th>Estudiante</th>
-                  <th>Asistencias</th>
-                  <th>Tardanzas</th>
-                  <th>Inasistencias</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {studentAggregates.map((item) => (
-                  <tr key={item.studentId}>
-                    <td>{item.name || `ID ${item.studentId}`}</td>
-                    <td>{item.present ?? 0}</td>
-                    <td>{item.late ?? 0}</td>
-                    <td>{item.absent ?? 0}</td>
-                    <td>{item.total ?? 0}</td>
-                  </tr>
-                ))}
-                {!loading && studentAggregates.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="empty">Aún no hay registros para calcular el resumen.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </section>
+          </div>
         </div>
       )}
     </div>

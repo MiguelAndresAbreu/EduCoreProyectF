@@ -250,6 +250,92 @@
   align-items: flex-end;
 }
 
+.attendance-tabs {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+  padding: 0;
+  overflow: hidden;
+}
+
+.tab-list {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fbff;
+}
+
+.tab-list button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  color: #475569;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tab-list button.active {
+  background: #1e3a8a;
+  color: #ffffff;
+}
+
+.tab-panel {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #1e3a8a;
+}
+
+.panel-header p {
+  margin: 2px 0 0 0;
+  color: #475569;
+}
+
+.control-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-inline input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+}
+
+.register-panel .attendance-table-container {
+  padding: 0;
+  box-shadow: none;
+}
+
+.register-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.summary-grid.compact {
+  width: 100%;
+  max-width: 720px;
+}
+
 @media (max-width: 1024px) {
   .attendance-grid.teacher {
     grid-template-columns: 1fr;
