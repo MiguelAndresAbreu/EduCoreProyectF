@@ -6,6 +6,7 @@ import {
   fetchIncidentsByStudent,
   createIncident as createIncidentMutation,
   updateIncidentStatus as updateIncidentStatusMutation,
+  fetchUsersList,
 } from "../../api/graphqlOperations";
 import "./Incidents.css";
 
@@ -31,10 +32,26 @@ export default function Incidents() {
     description: "",
     date: new Date().toISOString().slice(0, 10),
   });
+  const [usersOptions, setUsersOptions] = useState([]);
+  const [reportedQuery, setReportedQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     fetchIncidents();
   }, [statusFilter]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (!isTeacher && !isStudent) return;
+      try {
+        const data = await fetchUsersList();
+        setUsersOptions(Array.isArray(data) ? data : []);
+      } catch {
+        setUsersOptions([]);
+      }
+    };
+    loadUsers();
+  }, [isTeacher, isStudent]);
 
   const fetchIncidents = async () => {
     try {
@@ -62,6 +79,21 @@ export default function Incidents() {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
+  const handleReportedQueryChange = (value) => {
+    setReportedQuery(value);
+    const match = usersOptions.find((userOption) => {
+      const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim();
+      return fullName.toLowerCase() === value.toLowerCase();
+    });
+    setFormData((prev) => ({ ...prev, reportedId: match?.id ? String(match.id) : "" }));
+    setShowSuggestions(true);
+  };
+
+  const filteredUsers = usersOptions.filter((userOption) => {
+    const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
+    return reportedQuery.length >= 1 && fullName.includes(reportedQuery.toLowerCase());
+  });
+
   const handleCreateIncident = async (event) => {
     event.preventDefault();
     if (!formData.reportedId || !formData.description) return;
@@ -75,6 +107,7 @@ export default function Incidents() {
         reporterId: user?.id ? Number(user.id) : undefined,
       });
       setFormData({ reportedId: "", description: "", date: new Date().toISOString().slice(0, 10) });
+      setReportedQuery("");
       await fetchIncidents();
       setError("");
     } catch (err) {
@@ -104,6 +137,65 @@ export default function Incidents() {
 
       <div className="incidents-grid">
         <section className="incidents-list">
+          {(isStudent || isTeacher) && (
+            <div className="incidents-form inline">
+              <h3>Reportar nueva incidencia</h3>
+              <form onSubmit={handleCreateIncident}>
+                <div className="form-row">
+                  <label>
+                    Usuario reportado
+                    <div className="autocomplete">
+                      <input
+                        type="text"
+                        value={reportedQuery}
+                        onChange={(e) => handleReportedQueryChange(e.target.value)}
+                        onFocus={() => setShowSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+                        placeholder="Escribe un nombre"
+                        required
+                      />
+                      {showSuggestions && filteredUsers.length > 0 && (
+                        <ul className="suggestions">
+                          {filteredUsers.slice(0, 8).map((option) => {
+                            const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
+                            return (
+                              <li
+                                key={option.id}
+                                onMouseDown={() => {
+                                  setReportedQuery(fullName);
+                                  setFormData((prev) => ({ ...prev, reportedId: String(option.id) }));
+                                  setShowSuggestions(false);
+                                }}
+                              >
+                                {fullName}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  </label>
+                  <label>
+                    Fecha
+                    <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
+                  </label>
+                  <label className="grow">
+                    Descripcion
+                    <input
+                      type="text"
+                      value={formData.description}
+                      onChange={handleFormChange("description")}
+                      placeholder="Describe la situacion presentada"
+                      required
+                    />
+                  </label>
+                  <button type="submit" disabled={saving}>
+                    {saving ? "Enviando..." : "Enviar reporte"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           <div className="list-header">
             <h2>Incidencias registradas</h2>
             {isAdmin && (
@@ -169,39 +261,6 @@ export default function Incidents() {
           </table>
         </section>
 
-        {(isStudent || isTeacher) && (
-          <section className="incidents-form">
-            <h3>Reportar nueva incidencia</h3>
-            <form onSubmit={handleCreateIncident}>
-              <label>
-                ID del usuario reportado
-                <input
-                  type="number"
-                  value={formData.reportedId}
-                  onChange={handleFormChange("reportedId")}
-                  required
-                />
-              </label>
-              <label>
-                Fecha
-                <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
-              </label>
-              <label>
-                Descripción
-                <textarea
-                  rows={4}
-                  value={formData.description}
-                  onChange={handleFormChange("description")}
-                  placeholder="Describe la situación presentada"
-                  required
-                />
-              </label>
-              <button type="submit" disabled={saving}>
-                {saving ? "Enviando..." : "Enviar reporte"}
-              </button>
-            </form>
-          </section>
-        )}
       </div>
     </div>
   );
