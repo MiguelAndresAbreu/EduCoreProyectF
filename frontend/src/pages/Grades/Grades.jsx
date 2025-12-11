@@ -29,6 +29,7 @@ export default function Grades() {
   const [courseDetails, setCourseDetails] = useState(null);
   const [courseGrades, setCourseGrades] = useState([]);
   const [studentGrades, setStudentGrades] = useState([]);
+  const [studentFilter, setStudentFilter] = useState("ALL");
   const [formData, setFormData] = useState({
     studentId: "",
     type: "EXAM",
@@ -79,9 +80,10 @@ export default function Grades() {
       ]);
       setCourseDetails(course);
       setCourseGrades(Array.isArray(courseGrades) ? courseGrades : []);
+      setStudentFilter("ALL");
       setError("");
     } catch (err) {
-      setError("No se pudo cargar la información del curso.");
+      setError("No se pudo cargar la informacion del curso.");
       setCourseGrades([]);
     } finally {
       setLoading(false);
@@ -147,6 +149,13 @@ export default function Grades() {
   };
 
   const gradesToDisplay = (isTeacher || isAdmin) ? courseGrades : studentGrades;
+
+  const filteredCourseGrades = useMemo(() => {
+    if (!isTeacher) return courseGrades;
+    if (studentFilter === "ALL") return courseGrades;
+    const id = Number(studentFilter);
+    return courseGrades.filter((grade) => Number(grade.student?.id) === id);
+  }, [courseGrades, isTeacher, studentFilter]);
 
   const averageGrade = useMemo(() => {
     if (!gradesToDisplay.length) return 0;
@@ -275,8 +284,23 @@ export default function Grades() {
       <div className={`grades-grid ${isTeacher ? "teacher" : isAdmin ? "admin" : "student"}`}>
         <div className="grades-table-container">
           <div className="table-header">
-            <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial académico"}</h2>
-            {loading && <span className="loading">Cargando...</span>}
+            <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial academico"}</h2>
+            <div className="header-actions">
+              {isTeacher && (
+                <label className="header-filter">
+                  Estudiante
+                  <select value={studentFilter} onChange={(e) => setStudentFilter(e.target.value)}>
+                    <option value="ALL">Todos</option>
+                    {currentStudents.map((student) => (
+                      <option key={student.id} value={student.id}>
+                        {`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {loading && <span className="loading">Cargando...</span>}
+            </div>
           </div>
           <table className="grades-table">
             <thead>
@@ -288,7 +312,7 @@ export default function Grades() {
               </tr>
             </thead>
             <tbody>
-              {gradesToDisplay.map((grade) => (
+              {(isTeacher ? filteredCourseGrades : gradesToDisplay).map((grade) => (
                 <tr key={grade.id}>
                   <td>
                     {(isTeacher || isAdmin)

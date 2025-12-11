@@ -480,10 +480,6 @@ export default function Attendance() {
                     <h4>Tardanzas</h4>
                     <p>{summaryCards?.late ?? 0}</p>
                   </div>
-                  <div className="summary-card highlight">
-                    <h4>Porcentaje</h4>
-                    <p>{summaryCards?.attendanceRate ?? 0}%</p>
-                  </div>
                 </div>
                 <button
                   type="button"

@@ -336,6 +336,13 @@
   max-width: 720px;
 }
 
+.register-footer .attendance-submit {
+  height: 38px;
+  padding: 8px 14px;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
 @media (max-width: 1024px) {
   .attendance-grid.teacher {
     grid-template-columns: 1fr;
