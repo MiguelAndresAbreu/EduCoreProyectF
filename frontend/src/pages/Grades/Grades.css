@@ -251,4 +251,14 @@
 .grade-form.inline button {
   align-self: stretch;
   min-width: 140px;
+  padding: 0.55rem 0.75rem;
+  height: 42px;
+}
+
+.grade-form-wrapper {
+  margin-bottom: 12px;
+}
+
+.grades-summary.bottom-summary {
+  margin-top: 12px;
 }

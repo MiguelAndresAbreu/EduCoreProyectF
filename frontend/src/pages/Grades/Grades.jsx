@@ -223,54 +223,57 @@ export default function Grades() {
         </div>
       )}
 
+      {isTeacher && (
+        <div className="grade-form-wrapper">
+          <form className="grade-form inline" onSubmit={handleCreateGrade}>
+            <label>
+              Estudiante
+              <select value={formData.studentId} onChange={handleFormChange("studentId")} required>
+                <option value="" disabled>
+                  Selecciona un estudiante
+                </option>
+                {currentStudents.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Tipo
+              <select value={formData.type} onChange={handleFormChange("type")}>
+                {GRADE_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Nota
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={formData.value}
+                onChange={handleFormChange("value")}
+                required
+              />
+            </label>
+            <label>
+              Fecha
+              <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
+            </label>
+            <button type="submit" disabled={saving || !formData.studentId}>
+              {saving ? "Guardando..." : "Registrar"}
+            </button>
+          </form>
+        </div>
+      )}
+
       <div className={`grades-grid ${isTeacher ? "teacher" : isAdmin ? "admin" : "student"}`}>
         <div className="grades-table-container">
-          {isTeacher && (
-            <form className="grade-form inline" onSubmit={handleCreateGrade}>
-              <label>
-                Estudiante
-                <select value={formData.studentId} onChange={handleFormChange("studentId")} required>
-                  <option value="" disabled>
-                    Selecciona un estudiante
-                  </option>
-                  {currentStudents.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {`${student.person?.firstName ?? ""} ${student.person?.lastName ?? ""}`.trim()}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Tipo
-                <select value={formData.type} onChange={handleFormChange("type")}>
-                  {GRADE_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Nota
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={formData.value}
-                  onChange={handleFormChange("value")}
-                  required
-                />
-              </label>
-              <label>
-                Fecha
-                <input type="date" value={formData.date} onChange={handleFormChange("date")} required />
-              </label>
-              <button type="submit" disabled={saving || !formData.studentId}>
-                {saving ? "Guardando..." : "Registrar"}
-              </button>
-            </form>
-          )}
           <div className="table-header">
             <h2>{(isTeacher || isAdmin) ? "Calificaciones del curso" : "Historial académico"}</h2>
             {loading && <span className="loading">Cargando...</span>}
@@ -308,12 +311,12 @@ export default function Grades() {
             </tbody>
           </table>
         </div>
+      </div>
 
-        <div className="grades-summary">
-          <div className="summary-card highlight">
-            <h4>Promedio general</h4>
-            <p>{averageGrade}</p>
-          </div>
+      <div className="grades-summary bottom-summary">
+        <div className="summary-card highlight">
+          <h4>Promedio general</h4>
+          <p>{averageGrade}</p>
         </div>
       </div>
     </div>
