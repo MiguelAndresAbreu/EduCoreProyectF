@@ -69,12 +69,12 @@ export class GradesResolver {
   @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER)
   @Query(() => [GradeModel])
   async gradesByCourse(
+    @CurrentUser() user: JwtPayload,
     @Args('courseId', { type: () => Int }) courseId: number,
     @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
     @Args('type', { type: () => String, nullable: true }) type?: string,
     @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
     @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
-    @CurrentUser() user: JwtPayload,
   ): Promise<GradeModel[]> {
     if (user.role === UserRole.TEACHER) {
       const teacher = await this.teachersService.findByUserId(user.sub);
@@ -93,12 +93,12 @@ export class GradesResolver {
   @Roles(UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER, UserRole.STUDENT)
   @Query(() => [GradeModel])
   async gradesByStudent(
+    @CurrentUser() user: JwtPayload,
     @Args('studentId', { type: () => Int }) studentId: number,
     @Args('subjectId', { type: () => Int, nullable: true }) subjectId?: number,
     @Args('type', { type: () => String, nullable: true }) type?: string,
     @Args('startDate', { type: () => String, nullable: true }) startDate?: string,
     @Args('endDate', { type: () => String, nullable: true }) endDate?: string,
-    @CurrentUser() user: JwtPayload,
   ): Promise<GradeModel[]> {
     if (user.role === UserRole.STUDENT) {
       const student = await this.studentsService.findByUserId(user.sub);
@@ -167,7 +167,7 @@ export class GradesResolver {
       course: report.course,
       subject: report.subject ?? null,
       grades: report.grades
-        .map((grade) => GradeModel.fromEntity(grade))
+        .map((grade) => GradeModel.fromEntity(grade as any)) // Conversión segura
         .filter((g): g is GradeModel => g !== null),
       subjectAverages: report.subjectAverages,
       typeAverages: report.typeAverages,
