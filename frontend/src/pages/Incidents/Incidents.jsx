@@ -80,16 +80,29 @@ export default function Incidents() {
 
   const handleReportedQueryChange = (value) => {
     setReportedQuery(value);
-    const match = usersOptions.find((userOption) => {
-      const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim();
-      return fullName.toLowerCase() === value.toLowerCase();
-    });
-    setFormData((prev) => ({ ...prev, reportedId: match?.id ? String(match.id) : "" }));
+    const trimmed = value.trim();
+    let nextId = "";
+    if (/^\\d+$/.test(trimmed)) {
+      nextId = trimmed;
+    } else {
+      const match = usersOptions.find((userOption) => {
+        const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim();
+        return (
+          fullName.toLowerCase() === trimmed.toLowerCase() ||
+          userOption.username?.toLowerCase() === trimmed.toLowerCase()
+        );
+      });
+      nextId = match?.id ? String(match.id) : "";
+    }
+    setFormData((prev) => ({ ...prev, reportedId: nextId }));
   };
 
   const filteredUsers = usersOptions.filter((userOption) => {
     const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
-    return reportedQuery.length === 0 || fullName.includes(reportedQuery.toLowerCase());
+    const username = userOption.username?.toLowerCase() ?? "";
+    if (!reportedQuery) return true;
+    const query = reportedQuery.toLowerCase();
+    return fullName.includes(query) || username.includes(query);
   });
 
   const handleCreateIncident = async (event) => {
@@ -140,18 +153,18 @@ export default function Incidents() {
 
       {error && <div className="incidents-error">{error}</div>}
 
-      {(isStudent || isTeacher) && (
-        <div className="incidents-form inline">
-          <h3>Reportar nueva incidencia</h3>
-          <form onSubmit={handleCreateIncident}>
-            <div className="form-row">
-              <label>
+        {(isStudent || isTeacher || isAdmin) && (
+          <div className="incidents-form inline">
+            <h3>Reportar nueva incidencia</h3>
+            <form onSubmit={handleCreateIncident}>
+              <div className="form-row">
+                <label>
                 Usuario reportado
                 <input
                   type="text"
                   value={reportedQuery}
                   onChange={(e) => handleReportedQueryChange(e.target.value)}
-                  placeholder="Buscar por nombre"
+                  placeholder="Buscar por nombre o username"
                   list="reported-users"
                   required
                 />
@@ -160,7 +173,7 @@ export default function Incidents() {
                     const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
                     return (
                       <option key={option.id} value={fullName}>
-                        {fullName}
+                        {`${fullName} (${option.username ?? "sin usuario"})`}
                       </option>
                     );
                   })}
@@ -193,7 +206,7 @@ export default function Incidents() {
           <div className="list-header">
             <h2>Incidencias registradas</h2>
             {isAdmin && (
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
                 <option value="">Todas</option>
                 {STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
