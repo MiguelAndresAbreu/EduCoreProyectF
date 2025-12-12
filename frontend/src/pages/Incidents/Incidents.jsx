@@ -82,15 +82,12 @@ export default function Incidents() {
     setReportedQuery(value);
     const trimmed = value.trim();
     let nextId = "";
-    if (/^\\d+$/.test(trimmed)) {
+    if (/^\d+$/.test(trimmed)) {
       nextId = trimmed;
     } else {
       const match = usersOptions.find((userOption) => {
         const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim();
-        return (
-          fullName.toLowerCase() === trimmed.toLowerCase() ||
-          userOption.username?.toLowerCase() === trimmed.toLowerCase()
-        );
+        return fullName.toLowerCase() === trimmed.toLowerCase();
       });
       nextId = match?.id ? String(match.id) : "";
     }
@@ -99,7 +96,12 @@ export default function Incidents() {
 
   const filteredUsers = usersOptions.filter((userOption) => {
     const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
-    const username = userOption.username?.toLowerCase() ?? "";
+    if (!reportedQuery) return true;
+    const query = reportedQuery.toLowerCase();
+    return fullName.includes(query);
+  });
+    const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
+    const username =  ?? "";
     if (!reportedQuery) return true;
     const query = reportedQuery.toLowerCase();
     return fullName.includes(query) || username.includes(query);
@@ -164,7 +166,7 @@ export default function Incidents() {
                   type="text"
                   value={reportedQuery}
                   onChange={(e) => handleReportedQueryChange(e.target.value)}
-                  placeholder="Buscar por nombre o username"
+                  placeholder="Buscar por nombre o ID"
                   list="reported-users"
                   required
                 />
@@ -173,7 +175,7 @@ export default function Incidents() {
                     const fullName = `${option.person?.firstName ?? ""} ${option.person?.lastName ?? ""}`.trim();
                     return (
                       <option key={option.id} value={fullName}>
-                        {`${fullName} (${option.username ?? "sin usuario"})`}
+                        {fullName}
                       </option>
                     );
                   })}
