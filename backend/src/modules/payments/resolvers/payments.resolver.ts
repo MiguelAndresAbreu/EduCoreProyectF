@@ -39,9 +39,18 @@ export class PaymentsResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.FINANCE)
+  @Roles(UserRole.ADMIN, UserRole.FINANCE, UserRole.STUDENT)
   @Mutation(() => PaymentModel)
-  async createPayment(@Args('input') input: CreatePaymentInput): Promise<PaymentModel> {
+  async createPayment(
+    @Args('input') input: CreatePaymentInput,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<PaymentModel> {
+    if (user.role === UserRole.STUDENT) {
+      const student = await this.studentsService.findByUserId(user.sub);
+      if (!student || student.id !== input.studentId) {
+        throw new ForbiddenException('No autorizado para registrar pagos de otro estudiante');
+      }
+    }
     const payment = await this.paymentsService.create(input);
     return PaymentModel.fromEntity(payment);
   }

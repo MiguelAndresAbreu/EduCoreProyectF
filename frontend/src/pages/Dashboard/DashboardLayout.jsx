@@ -161,7 +161,7 @@ export default function DashboardLayout() {
                 <span>Calificaciones</span>
               </Link>
             </li>
-            {(profile?.role !== "TEACHER") && (
+            {(profile?.role === "STUDENT" || profile?.role === "ADMIN" || profile?.role === "FINANCE" || profile?.role === "STAFF") && (
               <li>
                 <Link to="/payments">
                   <CreditCard size={18} />
