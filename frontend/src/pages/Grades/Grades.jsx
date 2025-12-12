@@ -30,6 +30,7 @@ export default function Grades() {
   const [courseGrades, setCourseGrades] = useState([]);
   const [studentGrades, setStudentGrades] = useState([]);
   const [studentFilter, setStudentFilter] = useState("ALL");
+  const [studentCourseFilter, setStudentCourseFilter] = useState("ALL");
   const [formData, setFormData] = useState({
     studentId: "",
     type: "EXAM",
@@ -156,6 +157,13 @@ export default function Grades() {
     const id = Number(studentFilter);
     return courseGrades.filter((grade) => Number(grade.student?.id) === id);
   }, [courseGrades, isTeacher, studentFilter]);
+
+  const filteredStudentGrades = useMemo(() => {
+    if (!isStudent) return studentGrades;
+    if (studentCourseFilter === "ALL") return studentGrades;
+    const id = Number(studentCourseFilter);
+    return studentGrades.filter((grade) => Number(grade.course?.id) === id);
+  }, [studentGrades, isStudent, studentCourseFilter]);
 
   const averageGrade = useMemo(() => {
     if (!gradesToDisplay.length) return 0;
@@ -299,6 +307,19 @@ export default function Grades() {
                   </select>
                 </label>
               )}
+              {isStudent && (
+                <label className="header-filter">
+                  Curso
+                  <select value={studentCourseFilter} onChange={(e) => setStudentCourseFilter(e.target.value)}>
+                    <option value="ALL">Todos</option>
+                    {studentGrades.map((grade) => (
+                      <option key={grade.course?.id ?? grade.id} value={grade.course?.id ?? ""}>
+                        {grade.course?.name ?? "Curso"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {loading && <span className="loading">Cargando...</span>}
             </div>
           </div>
@@ -312,7 +333,7 @@ export default function Grades() {
               </tr>
             </thead>
             <tbody>
-              {(isTeacher ? filteredCourseGrades : gradesToDisplay).map((grade) => (
+              {(isTeacher ? filteredCourseGrades : isStudent ? filteredStudentGrades : gradesToDisplay).map((grade) => (
                 <tr key={grade.id}>
                   <td>
                     {(isTeacher || isAdmin)
