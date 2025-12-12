@@ -161,9 +161,35 @@ export default function Grades() {
   const filteredStudentGrades = useMemo(() => {
     if (!isStudent) return studentGrades;
     if (studentCourseFilter === "ALL") return studentGrades;
-    const id = Number(studentCourseFilter);
-    return studentGrades.filter((grade) => Number(grade.course?.id) === id);
+    const targetKey = studentCourseFilter;
+    return studentGrades.filter((grade) => {
+      const courseKey =
+        grade.course?.id !== undefined && grade.course?.id !== null
+          ? String(grade.course.id)
+          : grade.course?.name ?? "";
+      return courseKey === targetKey;
+    });
   }, [studentGrades, isStudent, studentCourseFilter]);
+
+  const studentCourseOptions = useMemo(() => {
+    const seen = new Set();
+    const options = [];
+    studentGrades.forEach((grade) => {
+      const courseKey =
+        grade.course?.id !== undefined && grade.course?.id !== null
+          ? String(grade.course.id)
+          : grade.course?.name ?? "";
+      if (!courseKey || seen.has(courseKey)) {
+        return;
+      }
+      seen.add(courseKey);
+      options.push({
+        id: courseKey,
+        name: grade.course?.name ?? "Curso",
+      });
+    });
+    return options;
+  }, [studentGrades]);
 
   const averageGrade = useMemo(() => {
     if (!gradesToDisplay.length) return 0;
@@ -312,9 +338,9 @@ export default function Grades() {
                   Curso
                   <select value={studentCourseFilter} onChange={(e) => setStudentCourseFilter(e.target.value)}>
                     <option value="ALL">Todos</option>
-                    {studentGrades.map((grade) => (
-                      <option key={grade.course?.id ?? grade.id} value={grade.course?.id ?? ""}>
-                        {grade.course?.name ?? "Curso"}
+                    {studentCourseOptions.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.name}
                       </option>
                     ))}
                   </select>
