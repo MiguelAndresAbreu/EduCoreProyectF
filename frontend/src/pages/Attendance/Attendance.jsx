@@ -29,6 +29,7 @@ export default function Attendance() {
   const [savedAttendance, setSavedAttendance] = useState({ records: [], summary: null });
   const [studentAggregates, setStudentAggregates] = useState([]);
   const [studentAttendance, setStudentAttendance] = useState({ records: [], summary: null });
+  const [studentCourseFilter, setStudentCourseFilter] = useState("ALL");
   const [attendanceDraft, setAttendanceDraft] = useState({});
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [savedDateFilter, setSavedDateFilter] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -186,6 +187,7 @@ export default function Attendance() {
         records: data?.records ?? [],
         summary: data?.summary ?? null,
       });
+      setStudentCourseFilter("ALL");
       setError("");
     } catch (err) {
       setError("No se pudo cargar tu historial de asistencia.");
@@ -226,7 +228,35 @@ export default function Attendance() {
   }, [courseDetails]);
 
   const summaryCards = isTeacher ? courseAttendance.summary : studentAttendance.summary;
-  const recordsToShow = isTeacher ? courseAttendance.records : studentAttendance.records;
+  const studentCourseOptions = useMemo(() => {
+    if (!studentAttendance.records) return [];
+    const seen = new Set();
+    const options = [];
+    studentAttendance.records.forEach((record) => {
+      const courseKey =
+        record.course?.id !== undefined && record.course?.id !== null
+          ? String(record.course.id)
+          : record.course?.name ?? "";
+      if (!courseKey || seen.has(courseKey)) return;
+      seen.add(courseKey);
+      options.push({ id: courseKey, name: record.course?.name ?? "Curso" });
+    });
+    return options;
+  }, [studentAttendance.records]);
+
+  const filteredStudentRecords = useMemo(() => {
+    if (!isStudent) return studentAttendance.records;
+    if (studentCourseFilter === "ALL") return studentAttendance.records;
+    return (studentAttendance.records ?? []).filter((record) => {
+      const courseKey =
+        record.course?.id !== undefined && record.course?.id !== null
+          ? String(record.course.id)
+          : record.course?.name ?? "";
+      return courseKey === studentCourseFilter;
+    });
+  }, [studentAttendance.records, isStudent, studentCourseFilter]);
+
+  const recordsToShow = isTeacher ? courseAttendance.records : filteredStudentRecords;
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return "-";
     const parsed = parse(dateStr, "yyyy-MM-dd", new Date());
@@ -585,7 +615,25 @@ export default function Attendance() {
           <div className="attendance-table-container">
             <div className="table-header">
               <h2>Historial</h2>
-              {loading && <span className="loading">Cargando...</span>}
+              <div className="header-actions">
+                {isStudent && (
+                  <label className="header-filter">
+                    Curso
+                    <select
+                      value={studentCourseFilter}
+                      onChange={(e) => setStudentCourseFilter(e.target.value)}
+                    >
+                      <option value="ALL">Todos</option>
+                      {studentCourseOptions.map((course) => (
+                        <option key={course.id} value={course.id}>
+                          {course.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {loading && <span className="loading">Cargando...</span>}
+              </div>
             </div>
             <table className="attendance-table">
               <thead>
