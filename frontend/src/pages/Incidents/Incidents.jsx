@@ -100,12 +100,6 @@ export default function Incidents() {
     const query = reportedQuery.toLowerCase();
     return fullName.includes(query);
   });
-    const fullName = `${userOption.person?.firstName ?? ""} ${userOption.person?.lastName ?? ""}`.trim().toLowerCase();
-    const username =  ?? "";
-    if (!reportedQuery) return true;
-    const query = reportedQuery.toLowerCase();
-    return fullName.includes(query) || username.includes(query);
-  });
 
   const handleCreateIncident = async (event) => {
     event.preventDefault();
