@@ -109,7 +109,10 @@ export default function Profile() {
     setSaving(true);
     setStatus({ type: "idle", message: "" });
 
-    const personPayload = {
+    const currentPerson = user.person || {};
+    const normalizedCurrentBirthDate = toInputDate(currentPerson.birthDate);
+
+    const draftPerson = {
       firstName: formValues.firstName.trim(),
       lastName: formValues.lastName.trim(),
       email: formValues.email.trim(),
@@ -119,14 +122,29 @@ export default function Profile() {
       avatar: formValues.avatar.trim() || undefined,
     };
 
-    Object.keys(personPayload).forEach((key) => {
-      if (personPayload[key] === undefined || personPayload[key] === "") {
-        delete personPayload[key];
+    const personPayload = Object.entries(draftPerson).reduce((acc, [key, value]) => {
+      if (value === undefined || value === "") return acc;
+      const currentValue =
+        key === "birthDate" ? normalizedCurrentBirthDate : (currentPerson[key] ?? "");
+      if (value !== currentValue) {
+        acc[key] = value;
       }
-    });
+      return acc;
+    }, {});
 
     try {
-      const userPayload = personPayload.email ? { email: personPayload.email } : undefined;
+      const userPayload =
+        personPayload.email && formValues.email.trim() !== (user.email ?? "")
+          ? { email: personPayload.email }
+          : undefined;
+
+      if (Object.keys(personPayload).length === 0 && !userPayload) {
+        setStatus({ type: "success", message: "No hay cambios para guardar." });
+        setIsEditing(false);
+        setSaving(false);
+        return;
+      }
+
       await updateProfileMutation(user.id, user.person.id, personPayload, userPayload);
       await refreshUser();
       setStatus({ type: "success", message: "Perfil actualizado correctamente." });
