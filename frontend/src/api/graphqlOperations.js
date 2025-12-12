@@ -196,6 +196,11 @@ export async function fetchProfile() {
 }
 
 export async function updateProfile(userId, personId, personInput, userInput) {
+  const normalizedUserId = Number(userId);
+  const normalizedPersonId = Number(personId);
+  if (!Number.isInteger(normalizedUserId) || !Number.isInteger(normalizedPersonId)) {
+    throw new Error('userId o personId invalidos para actualizar perfil');
+  }
   const data = await graphqlRequest(
     `mutation UpdateProfile($userId: Int!, $personId: Int!, $input: UpdateProfileInput!) {
       updateProfile(userId: $userId, personId: $personId, input: $input) {
@@ -203,8 +208,8 @@ export async function updateProfile(userId, personId, personInput, userInput) {
       }
     }`,
     {
-      userId,
-      personId,
+      userId: normalizedUserId,
+      personId: normalizedPersonId,
       input: {
         person: personInput,
         ...(userInput ? { user: userInput } : {}),
