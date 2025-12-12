@@ -92,15 +92,20 @@ export default function Payments() {
 
   const handleStudentPay = async (event) => {
     event.preventDefault();
-    if (!user?.student?.id || !paymentModal.amount || !paymentModal.concept) {
+    const studentPaymentId = Number(user?.student?.id);
+    if (!studentPaymentId) {
+      setError("No se encontro el id de estudiante.");
+      return;
+    }
+    if (!paymentModal.amount || !paymentModal.concept) {
       setError("Completa los datos del pago.");
       return;
     }
     setPaying(true);
     try {
       await createPaymentMutation({
-        studentId: Number(user.student.id),
-        concept: paymentModal.concept,
+        studentId: studentPaymentId,
+        concept: paymentModal.concept.trim(),
         amount: Number(paymentModal.amount),
         paymentDate: new Date().toISOString().slice(0, 10),
         method: paymentModal.method,
@@ -166,7 +171,7 @@ export default function Payments() {
                             setPaymentModal({
                               open: true,
                               concept: payment.concept ?? "Pago",
-                              amount: payment.amount ?? "",
+                              amount: payment.amount ? String(payment.amount) : "",
                               method: "CARD",
                             })
                           }
