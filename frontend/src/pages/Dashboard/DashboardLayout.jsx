@@ -161,12 +161,14 @@ export default function DashboardLayout() {
                 <span>Calificaciones</span>
               </Link>
             </li>
-            <li>
-              <Link to="/payments">
-                <CreditCard size={18} />
-                <span>Pagos</span>
-              </Link>
-            </li>
+            {(profile?.role !== "TEACHER") && (
+              <li>
+                <Link to="/payments">
+                  <CreditCard size={18} />
+                  <span>Pagos</span>
+                </Link>
+              </li>
+            )}
             <li>
               <Link to="/attendance">
                 <Calendar size={18} />
