@@ -191,7 +191,7 @@ export default function DashboardLayout() {
                 </Link>
               </li>
             )}
-            {profile?.role !== "STUDENT" && (
+            {(profile?.role === "ADMIN" || profile?.role === "STAFF" || profile?.role === "FINANCE") && (
               <li>
                 <Link to="/reports">
                   <BarChart2 size={18} />

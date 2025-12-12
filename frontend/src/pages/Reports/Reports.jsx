@@ -6,6 +6,8 @@ import "./Reports.css";
 export default function Reports() {
   const { user } = useOutletContext();
   const isStudent = user?.role === "STUDENT";
+  const isTeacher = user?.role === "TEACHER";
+  const isAllowed = user?.role === "ADMIN" || user?.role === "STAFF" || user?.role === "FINANCE";
   const [filters, setFilters] = useState({
     courseId: "",
     studentId: "",
@@ -69,6 +71,17 @@ export default function Reports() {
     }
   };
 
+  if (!isAllowed) {
+    return (
+      <div className="reports-page">
+        <header className="reports-header">
+          <h1>Centro de reportes</h1>
+          <p>No tienes permisos para acceder a los reportes.</p>
+        </header>
+      </div>
+    );
+  }
+
   return (
     <div className="reports-page">
       <header className="reports-header">
@@ -78,7 +91,7 @@ export default function Reports() {
 
       {error && <div className="reports-error">{error}</div>}
 
-      {!isStudent && (
+      {!isStudent && !isTeacher && (
         <form className="reports-filters" onSubmit={handleGenerateReports}>
           <div className="filter-group">
             <label>
