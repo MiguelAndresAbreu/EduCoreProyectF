@@ -30,8 +30,15 @@ export default function Payments() {
     method: "CASH",
     status: "PAID",
   });
+  const [paymentModal, setPaymentModal] = useState({
+    open: false,
+    concept: "",
+    amount: "",
+    method: "CARD",
+  });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -48,7 +55,7 @@ export default function Payments() {
       setTotals(data.accountStatus ?? { paid: 0, pending: 0, balance: 0 });
       setError("");
     } catch (err) {
-      setError("No se pudo obtener la información de pagos.");
+      setError("No se pudo obtener la informacion de pagos.");
       setPayments([]);
       setTotals({ paid: 0, pending: 0, balance: 0 });
     } finally {
@@ -77,9 +84,35 @@ export default function Payments() {
       setFormData((prev) => ({ ...prev, concept: "", amount: "" }));
       setError("");
     } catch (err) {
-      setError("No se pudo registrar el pago. Verifica la información ingresada.");
+      setError("No se pudo registrar el pago. Verifica la informacion ingresada.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleStudentPay = async (event) => {
+    event.preventDefault();
+    if (!user?.student?.id || !paymentModal.amount || !paymentModal.concept) {
+      setError("Completa los datos del pago.");
+      return;
+    }
+    setPaying(true);
+    try {
+      await createPaymentMutation({
+        studentId: Number(user.student.id),
+        concept: paymentModal.concept,
+        amount: Number(paymentModal.amount),
+        paymentDate: new Date().toISOString().slice(0, 10),
+        method: paymentModal.method,
+        status: "PAID",
+      });
+      await fetchPayments(user.student.id);
+      setPaymentModal({ open: false, concept: "", amount: "", method: "CARD" });
+      setError("");
+    } catch (err) {
+      setError("No se pudo procesar el pago.");
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -105,9 +138,10 @@ export default function Payments() {
               <tr>
                 <th>Concepto</th>
                 <th>Monto</th>
-                <th>Método</th>
+                <th>Metodo</th>
                 <th>Estado</th>
                 <th>Fecha</th>
+                {isStudent && <th>Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -122,12 +156,34 @@ export default function Payments() {
                     </span>
                   </td>
                   <td>{payment.paymentDate}</td>
+                  {isStudent && (
+                    <td>
+                      {payment.status !== "PAID" ? (
+                        <button
+                          type="button"
+                          className="pay-action"
+                          onClick={() =>
+                            setPaymentModal({
+                              open: true,
+                              concept: payment.concept ?? "Pago",
+                              amount: payment.amount ?? "",
+                              method: "CARD",
+                            })
+                          }
+                        >
+                          Pagar
+                        </button>
+                      ) : (
+                        <span className="paid-label">Pagado</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
 
               {!loading && payments.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="empty">
+                  <td colSpan={isStudent ? 6 : 5} className="empty">
                     No hay pagos registrados para este estudiante.
                   </td>
                 </tr>
@@ -190,7 +246,7 @@ export default function Payments() {
                 <input type="date" value={formData.paymentDate} onChange={handleFormChange("paymentDate")} required />
               </label>
               <label>
-                Método
+                Metodo
                 <select value={formData.method} onChange={handleFormChange("method")}>
                   {METHODS.map((method) => (
                     <option key={method.value} value={method.value}>
@@ -240,6 +296,66 @@ export default function Payments() {
           )}
         </aside>
       </div>
+
+      {paymentModal.open && (
+        <div className="modal-backdrop" onClick={() => setPaymentModal((prev) => ({ ...prev, open: false }))}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Registrar pago</h3>
+              <button className="ghost-btn" onClick={() => setPaymentModal((prev) => ({ ...prev, open: false }))}>
+                Cerrar
+              </button>
+            </div>
+            <form className="payment-modal-form" onSubmit={handleStudentPay}>
+              <label>
+                Concepto
+                <input
+                  type="text"
+                  value={paymentModal.concept}
+                  onChange={(e) => setPaymentModal((prev) => ({ ...prev, concept: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Monto
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={paymentModal.amount}
+                  onChange={(e) => setPaymentModal((prev) => ({ ...prev, amount: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Metodo
+                <select
+                  value={paymentModal.method}
+                  onChange={(e) => setPaymentModal((prev) => ({ ...prev, method: e.target.value }))}
+                >
+                  {METHODS.map((method) => (
+                    <option key={method.value} value={method.value}>
+                      {method.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => setPaymentModal((prev) => ({ ...prev, open: false }))}
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="primary-btn" disabled={paying}>
+                  {paying ? "Procesando..." : "Pagar ahora"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
