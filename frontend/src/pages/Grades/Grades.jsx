@@ -230,42 +230,6 @@ export default function Grades() {
         </section>
       )}
 
-      {isAdmin && (
-        <div className="grades-table-container course-list">
-          <div className="table-header">
-            <h2>Cursos</h2>
-            {loading && <span className="loading">Cargando...</span>}
-          </div>
-          <table className="grades-table">
-            <thead>
-              <tr>
-                <th>Curso</th>
-                <th>Materia</th>
-                <th>Docente</th>
-              </tr>
-            </thead>
-            <tbody>
-              {courseOptions.map((course) => (
-                <tr
-                  key={course.id}
-                  className={course.id === selectedCourseId ? "selected" : ""}
-                  onClick={() => setSelectedCourseId(course.id)}
-                >
-                  <td>{course.name}</td>
-                  <td>{course.subject?.name ?? "-"}</td>
-                  <td>{`${course.teacher?.person?.firstName ?? ""} ${course.teacher?.person?.lastName ?? ""}`.trim() || "-"}</td>
-                </tr>
-              ))}
-              {!loading && courseOptions.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="empty">Sin cursos disponibles.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {isTeacher && (
         <div className="grade-form-wrapper">
           <form className="grade-form inline" onSubmit={handleCreateGrade}>
