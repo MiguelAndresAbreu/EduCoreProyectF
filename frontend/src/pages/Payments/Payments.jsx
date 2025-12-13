@@ -132,6 +132,73 @@ export default function Payments() {
 
       {error && <div className="payments-error">{error}</div>}
 
+      {isFinance && (
+        <section className="payment-form wide">
+          <h3>Registrar nuevo pago</h3>
+          <form onSubmit={handleCreatePayment} className="payment-form-grid">
+            <label>
+              ID Estudiante
+              <input
+                type="number"
+                value={formData.studentId}
+                onChange={handleFormChange("studentId")}
+                required
+              />
+            </label>
+            <label>
+              Concepto
+              <input
+                type="text"
+                value={formData.concept}
+                onChange={handleFormChange("concept")}
+                placeholder="Mensualidad marzo"
+                required
+              />
+            </label>
+            <label>
+              Monto
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.amount}
+                onChange={handleFormChange("amount")}
+                required
+              />
+            </label>
+            <label>
+              Fecha de pago
+              <input type="date" value={formData.paymentDate} onChange={handleFormChange("paymentDate")} required />
+            </label>
+            <label>
+              Metodo
+              <select value={formData.method} onChange={handleFormChange("method")}>
+                {METHODS.map((method) => (
+                  <option key={method.value} value={method.value}>
+                    {method.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Estado
+              <select value={formData.status} onChange={handleFormChange("status")}>
+                {STATUSES.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="payment-form-actions">
+              <button type="submit" disabled={saving}>
+                {saving ? "Guardando..." : "Registrar pago"}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+
       <div className="payments-grid">
         <div className="payments-list-container">
           <div className="table-header">
@@ -212,69 +279,6 @@ export default function Payments() {
               ${currentTotals.balance?.toFixed?.(2) ?? Number(currentTotals.balance).toFixed(2)}
             </p>
           </div>
-
-          {isFinance && (
-            <form className="payment-form" onSubmit={handleCreatePayment}>
-              <h3>Registrar nuevo pago</h3>
-              <label>
-                ID Estudiante
-                <input
-                  type="number"
-                  value={formData.studentId}
-                  onChange={handleFormChange("studentId")}
-                  required
-                />
-              </label>
-              <label>
-                Concepto
-                <input
-                  type="text"
-                  value={formData.concept}
-                  onChange={handleFormChange("concept")}
-                  placeholder="Mensualidad marzo"
-                  required
-                />
-              </label>
-              <label>
-                Monto
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={handleFormChange("amount")}
-                  required
-                />
-              </label>
-              <label>
-                Fecha de pago
-                <input type="date" value={formData.paymentDate} onChange={handleFormChange("paymentDate")} required />
-              </label>
-              <label>
-                Metodo
-                <select value={formData.method} onChange={handleFormChange("method")}>
-                  {METHODS.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {method.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Estado
-                <select value={formData.status} onChange={handleFormChange("status")}>
-                  {STATUSES.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button type="submit" disabled={saving}>
-                {saving ? "Guardando..." : "Registrar pago"}
-              </button>
-            </form>
-          )}
 
           {isFinance && (
             <form
