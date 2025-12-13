@@ -38,7 +38,8 @@ export class PaymentsResolver {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.FINANCE, UserRole.STAFF, UserRole.STUDENT)
   @Mutation(() => PaymentModel)
   async createPayment(
     @Args('input') input: CreatePaymentInput,
