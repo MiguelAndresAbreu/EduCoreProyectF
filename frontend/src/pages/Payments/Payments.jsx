@@ -203,7 +203,34 @@ export default function Payments() {
         <div className="payments-list-container">
           <div className="table-header">
             <h2>Historial de pagos</h2>
-            {loading && <span className="loading">Cargando...</span>}
+            <div className="header-actions">
+              {isFinance && (
+                <form
+                  className="lookup-inline"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (studentId) {
+                      fetchPayments(studentId);
+                    }
+                  }}
+                >
+                  <label>
+                    Consultar estudiante
+                    <div className="lookup-fields">
+                      <input
+                        type="number"
+                        placeholder="ID del estudiante"
+                        value={studentId}
+                        onChange={(event) => setStudentId(event.target.value)}
+                        required
+                      />
+                      <button type="submit">Buscar</button>
+                    </div>
+                  </label>
+                </form>
+              )}
+              {loading && <span className="loading">Cargando...</span>}
+            </div>
           </div>
           <table className="payments-table">
             <thead>
@@ -279,30 +306,6 @@ export default function Payments() {
               ${currentTotals.balance?.toFixed?.(2) ?? Number(currentTotals.balance).toFixed(2)}
             </p>
           </div>
-
-          {isFinance && (
-            <form
-              className="lookup-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (studentId) {
-                  fetchPayments(studentId);
-                }
-              }}
-            >
-              <h4>Consultar estudiante</h4>
-              <div className="lookup-fields">
-                <input
-                  type="number"
-                  placeholder="ID del estudiante"
-                  value={studentId}
-                  onChange={(event) => setStudentId(event.target.value)}
-                  required
-                />
-                <button type="submit">Buscar</button>
-              </div>
-            </form>
-          )}
         </aside>
       </div>
 
